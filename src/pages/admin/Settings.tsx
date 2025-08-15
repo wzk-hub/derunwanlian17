@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { cleanupDuplicateAccounts, validateAdminAccount, forceResetAdminAccount } from '@/utils/adminAccountCleanup';
+import { debugAdminAccount, forceCreateAdminAccount, clearAllData, testLogin } from '@/utils/debugAdminAccount';
 
 interface PaymentQRCodes {
 	alipay?: string;
@@ -68,6 +69,44 @@ export default function AdminSettings() {
 		}
 	};
 
+	// 调试功能处理函数
+	const handleDebugAccount = () => {
+		const result = debugAdminAccount();
+		console.log('调试结果:', result);
+		toast.info('调试信息已输出到控制台，请按F12查看');
+	};
+
+	const handleForceCreateAdmin = () => {
+		if (confirm('确定要强制创建管理员账号吗？')) {
+			const result = forceCreateAdminAccount();
+			if (result.success) {
+				toast.success('管理员账号创建成功');
+			} else {
+				toast.error('创建失败: ' + result.error);
+			}
+		}
+	};
+
+	const handleTestLogin = () => {
+		const result = testLogin('15931319952', 'ljqwzk0103888');
+		if (result.success) {
+			toast.success('登录测试成功: ' + result.message);
+		} else {
+			toast.error('登录测试失败: ' + result.message);
+		}
+	};
+
+	const handleClearAllData = () => {
+		if (confirm('警告：这将清除所有数据！确定要继续吗？')) {
+			const result = clearAllData();
+			if (result.success) {
+				toast.success(result.message);
+			} else {
+				toast.error('清除失败: ' + result.error);
+			}
+		}
+	};
+
 	return (
 		<div className="space-y-6">
 			<h2 className="text-2xl font-bold text-gray-800">系统设置</h2>
@@ -126,6 +165,37 @@ export default function AdminSettings() {
 						>
 							重置管理员账号
 						</button>
+					</div>
+
+					{/* 调试功能 */}
+					<div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+						<h4 className="font-medium text-red-800 mb-3">调试功能（仅开发环境）</h4>
+						<div className="flex flex-wrap gap-2">
+							<button 
+								onClick={handleDebugAccount} 
+								className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+							>
+								调试账号状态
+							</button>
+							<button 
+								onClick={handleForceCreateAdmin} 
+								className="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+							>
+								强制创建管理员
+							</button>
+							<button 
+								onClick={handleTestLogin} 
+								className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition-colors"
+							>
+								测试登录
+							</button>
+							<button 
+								onClick={handleClearAllData} 
+								className="px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+							>
+								清除所有数据
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

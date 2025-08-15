@@ -92,10 +92,30 @@ const Login = () => {
       
       if (isLogin) {
         // 登录逻辑（管理员支持账号/手机号登录）
-        const user = users.find((u: any) => (u.phone === phone || u.id === phone || (u.role === 'admin' && u.phone === phone)) && u.password === password);
+        console.log('尝试登录，手机号:', phone, '密码:', password);
+        console.log('当前用户列表:', users);
+        
+        // 简化用户查找逻辑
+        let user = null;
+        
+        // 先尝试精确匹配手机号和密码
+        user = users.find((u: any) => u.phone === phone && u.password === password);
+        
+        // 如果没找到，尝试匹配ID和密码（支持管理员用ID登录）
+        if (!user) {
+          user = users.find((u: any) => u.id === phone && u.password === password);
+        }
+        
+        // 如果还没找到，尝试管理员特殊匹配
+        if (!user && phone === '15931319952') {
+          user = users.find((u: any) => u.phone === '15931319952' && u.role === 'admin' && u.password === password);
+        }
+        
+        console.log('找到的用户:', user);
         
         if (user) {
-       setAuth(user.id, user.role, user.name);
+          console.log('登录成功，用户信息:', user);
+          setAuth(user.id, user.role, user.name);
           
           // 保存当前用户信息
           localStorage.setItem('currentUser', JSON.stringify(user));
@@ -109,6 +129,7 @@ const Login = () => {
             navigate('/admin');
           }
         } else {
+          console.log('登录失败，未找到匹配的用户');
           setError('手机号或密码不正确');
         }
       } else {
