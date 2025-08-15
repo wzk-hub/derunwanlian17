@@ -1,5 +1,8 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '@/contexts/authContext';
+import { VirtualTable } from '@/components/VirtualList';
+import { SkeletonTableRow } from '@/components/Skeleton';
+import { TaskEmptyState } from '@/components/EmptyState';
 
 function toCSV(rows: any[]): string {
 	const headers = ['标题','金额','状态','课时','年级','科目'];
@@ -116,38 +119,44 @@ export default function AdminTasks() {
 				<button onClick={exportCSV} className="px-3 py-2 bg-gray-800 text-white rounded">导出CSV</button>
 			</div>
 
-			<div className="bg-white rounded-xl shadow-md overflow-hidden">
-				<table className="min-w-full">
-					<thead className="bg-gray-50">
-						<tr>
-							<th className="px-4 py-3 text-left text-sm text-gray-600">标题</th>
-							<th className="px-4 py-3 text-left text-sm text-gray-600">金额</th>
-							<th className="px-4 py-3 text-left text-sm text-gray-600">状态</th>
-							<th className="px-4 py-3 text-right text-sm text-gray-600">操作</th>
-						</tr>
-					</thead>
-					<tbody>
-						{rows.map((t: any) => (
-							<tr key={t.id} className="border-t">
-								<td className="px-4 py-3">{t.title}</td>
-								<td className="px-4 py-3">¥{Number(t.price).toFixed(2)}</td>
-								<td className="px-4 py-3 text-sm text-gray-600">{t.status}</td>
-								<td className="px-4 py-3 text-right space-x-2">
-									{t.status === 'pending' && (
-										<button onClick={() => approve(t.id)} className="px-3 py-1.5 bg-blue-600 text-white rounded">通过</button>
+			{/* 任务列表 */}
+			{rows.length > 0 ? (
+				<div className="h-[600px]">
+					<VirtualTable
+						items={rows}
+						height={600}
+						rowHeight={60}
+						columns={[
+							{ key: 'title', header: '标题', width: '40%' },
+							{ key: 'price', header: '金额', width: '20%', render: (item) => `¥${Number(item.price).toFixed(2)}` },
+							{ key: 'status', header: '状态', width: '20%', render: (item) => (
+								<span className="text-sm text-gray-600">{item.status}</span>
+							)},
+							{ key: 'actions', header: '操作', width: '20%', render: (item) => (
+								<div className="text-right space-x-2">
+									{item.status === 'pending' && (
+										<button onClick={() => approve(item.id)} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">
+											通过
+										</button>
 									)}
-									{t.status === 'payment_pending' && (
+									{item.status === 'payment_pending' && (
 										<>
-											<button onClick={() => confirmPayment(t.id)} className="px-3 py-1.5 bg-green-600 text-white rounded">确认支付</button>
-											<button onClick={() => rejectPayment(t.id)} className="px-3 py-1.5 bg-red-600 text-white rounded">驳回</button>
+											<button onClick={() => confirmPayment(item.id)} className="px-3 py-1.5 bg-green-600 text-white rounded text-sm">
+												确认支付
+											</button>
+											<button onClick={() => rejectPayment(item.id)} className="px-3 py-1.5 bg-red-600 text-white rounded text-sm">
+												驳回
+											</button>
 										</>
 									)}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+								</div>
+							)}
+						]}
+					/>
+				</div>
+			) : (
+				<TaskEmptyState type="all" />
+			)}
 		</div>
 	);
 }

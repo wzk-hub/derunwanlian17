@@ -1,6 +1,9 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
+import { VirtualList } from '@/components/VirtualList';
+import { SkeletonListItem } from '@/components/Skeleton';
+import { TaskEmptyState } from '@/components/EmptyState';
 
 interface TaskItem {
 	id: string;
@@ -61,41 +64,46 @@ export default function ParentTasks() {
 			</div>
 
 			{tasks.length === 0 ? (
-				<div className="bg-white rounded-xl shadow-md p-12 text-center">
-					<p className="text-gray-500">暂无任务，去发布一个吧。</p>
-					<button onClick={() => navigate('/parent/tasks/new')} className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">发布任务</button>
-				</div>
+				<TaskEmptyState 
+					type="all"
+					onCreateNew={() => navigate('/parent/tasks/new')}
+				/>
 			) : (
-				<div className="grid grid-cols-1 gap-4">
-					{tasks.map((t) => (
-						<div key={t.id} className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
-							<div className="flex items-start justify-between">
-								<div>
-									<button onClick={() => navigate(`/parent/tasks/${t.id}`)} className="text-left">
-										<h3 className="text-lg font-medium text-gray-800 hover:text-blue-700">{t.title}</h3>
-									</button>
-									<p className="text-gray-500 text-sm mt-1">课时：{t.duration} 小时 · 金额：¥{Number(t.price).toFixed(2)}</p>
+				<div className="h-[600px]">
+					<VirtualList
+						items={tasks}
+						height={600}
+						itemHeight={120}
+						renderItem={(task) => (
+							<div key={task.id} className="bg-white rounded-xl shadow-md p-5 border border-gray-100 mb-4">
+								<div className="flex items-start justify-between">
+									<div>
+										<button onClick={() => navigate(`/parent/tasks/${task.id}`)} className="text-left">
+											<h3 className="text-lg font-medium text-gray-800 hover:text-blue-700">{task.title}</h3>
+										</button>
+										<p className="text-gray-500 text-sm mt-1">课时：{task.duration} 小时 · 金额：¥{Number(task.price).toFixed(2)}</p>
+									</div>
+									<span className={`px-2 py-1 rounded text-xs font-medium ${statusText[task.status]?.color || 'bg-gray-100 text-gray-700'}`}>
+										{statusText[task.status]?.label || task.status}
+									</span>
 								</div>
-								<span className={`px-2 py-1 rounded text-xs font-medium ${statusText[t.status]?.color || 'bg-gray-100 text-gray-700'}`}>
-									{statusText[t.status]?.label || t.status}
-								</span>
-							</div>
 
-							<div className="mt-4 flex items-center gap-3">
-								{(t.status === 'pending' || t.status === 'approved' || t.status === 'payment_rejected' || t.status === 'payment_pending') && (
-									<button onClick={() => handlePay(t.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-										{t.status === 'payment_pending' ? '已提交，待确认' : '选择并支付'}
-									</button>
-								)}
-								{t.chatGroupId && (
-									<button onClick={() => navigate('/parent/messages')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">进入群聊</button>
-								)}
-								{!t.chatGroupId && (
-									<button onClick={() => moveToTrash(t.id)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">删除</button>
-								)}
+								<div className="mt-4 flex items-center gap-3">
+									{(task.status === 'pending' || task.status === 'approved' || task.status === 'payment_rejected' || task.status === 'payment_pending') && (
+										<button onClick={() => handlePay(task.id)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+											{task.status === 'payment_pending' ? '已提交，待确认' : '选择并支付'}
+										</button>
+									)}
+									{task.chatGroupId && (
+										<button onClick={() => navigate('/parent/messages')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">进入群聊</button>
+									)}
+									{!task.chatGroupId && (
+										<button onClick={() => moveToTrash(task.id)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">删除</button>
+									)}
+								</div>
 							</div>
-						</div>
-					))}
+						)}
+					/>
 				</div>
 			)}
 		</div>

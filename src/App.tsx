@@ -6,6 +6,7 @@ import { Suspense, lazy, useState, useEffect } from "react";
 import { AuthContext } from '@/contexts/authContext';
 import Navbar from "@/components/Navbar";
 import { getLocalStorageItem } from "@/lib/utils";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 const ParentDashboard = lazy(() => import("@/pages/ParentDashboard"));
 const TeacherDashboard = lazy(() => import("@/pages/TeacherDashboard"));
@@ -54,7 +55,7 @@ export default function App() {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const hasAdmin = users.some((u: any) => u.role === 'admin');
     if (!hasAdmin) {
-      users.push({ id: 'admin-1', phone: 'derunwanlian888', password: 'ljqwzk0103888', role: 'admin', name: '系统管理员', createdAt: new Date() });
+              users.push({ id: 'admin-1', phone: '15931319952', password: 'ljqwzk0103888', role: 'admin', name: '系统管理员', createdAt: new Date() });
       localStorage.setItem('users', JSON.stringify(users));
     }
   }, []);
@@ -182,6 +183,9 @@ export default function App() {
             </Routes>
           </Suspense>
         </main>
+        
+        {/* 性能监控组件 */}
+        <PerformanceMonitor enabled={process.env.NODE_ENV === 'development'} />
       </div>
     </AuthContext.Provider>
   );

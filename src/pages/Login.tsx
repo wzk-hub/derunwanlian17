@@ -36,7 +36,7 @@ const Login = () => {
       if (!hasAdmin) {
 const adminUser: User = {
   id: 'admin-1',
-  phone: 'derunwanlian888',
+          phone: '15931319952',
   password: 'ljqwzk0103888',
   role: 'admin',
   name: '系统管理员',
