@@ -100,9 +100,12 @@ pnpm preview
 ## 🐛 常见问题
 
 ### 构建失败
-1. 检查Node.js版本是否为18+
-2. 确认所有依赖已正确安装
-3. 查看构建日志中的错误信息
+1. **pnpm锁文件问题**: 如果看到 `ERR_PNPM_OUTDATED_LOCKFILE` 错误
+   - ✅ 已通过智能构建脚本修复
+   - 参考 `NETLIFY_TROUBLESHOOTING.md` 获取详细信息
+2. 检查Node.js版本是否为18+
+3. 确认所有依赖已正确安装
+4. 查看构建日志中的错误信息
 
 ### 路由不工作
 - 确认`netlify.toml`中的重定向规则已配置
