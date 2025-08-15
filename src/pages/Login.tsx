@@ -33,18 +33,23 @@ const Login = () => {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const hasAdmin = users.some((user: User) => user.role === 'admin');
       
+      // 删除其他使用15931319952的账号
+      const filteredUsers = users.filter((u: any) => u.phone !== '15931319952');
+      
       if (!hasAdmin) {
-const adminUser: User = {
-  id: 'admin-1',
+        const adminUser: User = {
+          id: 'admin-1',
           phone: '15931319952',
-  password: 'ljqwzk0103888',
-  role: 'admin',
-  name: '系统管理员',
-  createdAt: new Date()
-};
+          password: 'ljqwzk0103888',
+          role: 'admin',
+          name: '系统管理员',
+          createdAt: new Date()
+        };
         
-        users.push(adminUser);
-        localStorage.setItem('users', JSON.stringify(users));
+        filteredUsers.push(adminUser);
+        localStorage.setItem('users', JSON.stringify(filteredUsers));
+        users.length = 0;
+        users.push(...filteredUsers);
       }
     };
     

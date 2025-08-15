@@ -7,6 +7,7 @@ import { AuthContext } from '@/contexts/authContext';
 import Navbar from "@/components/Navbar";
 import { getLocalStorageItem } from "@/lib/utils";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+import { cleanupDuplicateAccounts, validateAdminAccount } from "@/utils/adminAccountCleanup";
 
 const ParentDashboard = lazy(() => import("@/pages/ParentDashboard"));
 const TeacherDashboard = lazy(() => import("@/pages/TeacherDashboard"));
@@ -53,10 +54,20 @@ export default function App() {
   // 确保管理员账号存在（防止首次未访问登录页导致未初始化）
   useEffect(() => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const hasAdmin = users.some((u: any) => u.role === 'admin');
-    if (!hasAdmin) {
-              users.push({ id: 'admin-1', phone: '15931319952', password: 'ljqwzk0103888', role: 'admin', name: '系统管理员', createdAt: new Date() });
-      localStorage.setItem('users', JSON.stringify(users));
+    
+    // 使用专门的清理工具
+    const result = cleanupDuplicateAccounts('15931319952');
+    
+    if (result.success) {
+      console.log('管理员账号清理完成:', result.message);
+    } else {
+      console.error('管理员账号清理失败:', result.message);
+    }
+    
+    // 验证管理员账号状态
+    const validation = validateAdminAccount();
+    if (!validation.isValid) {
+      console.warn('管理员账号状态异常:', validation.message);
     }
   }, []);
 
