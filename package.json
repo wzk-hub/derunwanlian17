@@ -7,7 +7,6 @@
     "dev": "vite --host --port 3000",
     "build": "rimraf dist && vite build",
     "preview": "vite preview --host --port 3000",
-    "preinstall": "npx only-allow pnpm",
     "start": "serve -l 3000 dist/static",
     "lint": "eslint src/**/*.{ts,tsx}",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
