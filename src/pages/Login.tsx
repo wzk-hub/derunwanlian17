@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
+import AdvancedSliderCaptcha from '@/components/AdvancedSliderCaptcha';
 
 // 模拟用户数据存储
 interface User {
@@ -26,6 +27,8 @@ const Login = () => {
   const [childGrade, setChildGrade] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
   
   // 初始化管理员账户（如果不存在）
   useEffect(() => {
@@ -51,10 +54,30 @@ const adminUser: User = {
     initAdminUser();
   }, []);
   
+  // 处理滑块验证成功
+  const handleCaptchaSuccess = () => {
+    setCaptchaVerified(true);
+    setCaptchaFailed(false);
+    setError('');
+  };
+  
+  // 处理滑块验证失败
+  const handleCaptchaFail = () => {
+    setCaptchaVerified(false);
+    setCaptchaFailed(true);
+    setError('请完成滑块验证');
+  };
+  
   // 处理表单提交
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // 检查滑块验证
+    if (!captchaVerified) {
+      setError('请先完成滑块验证');
+      return;
+    }
     
     // 表单验证
     if (!phone || !password) {
@@ -143,6 +166,18 @@ const adminUser: User = {
     }, 800);
   };
   
+  // 重置表单和验证状态
+  const resetForm = () => {
+    setIsLogin(!isLogin);
+    setError('');
+    setPhone('');
+    setPassword('');
+    setConfirmPassword('');
+    setChildGrade('');
+    setCaptchaVerified(false);
+    setCaptchaFailed(false);
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -159,7 +194,7 @@ const adminUser: User = {
             
             {error && (
               <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-center">
-                <i class="fa-solid fa-exclamation-circle mr-2"></i>
+                <i className="fa-solid fa-exclamation-circle mr-2"></i>
                 {error}
               </div>
             )}
@@ -172,7 +207,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-phone"></i>
+                    <i className="fa-solid fa-phone"></i>
                   </span>
                   <input
                     type="tel"
@@ -193,7 +228,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-lock"></i>
+                    <i className="fa-solid fa-lock"></i>
                   </span>
                   <input
                     type="password"
@@ -215,9 +250,9 @@ const adminUser: User = {
                     确认密码
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                      <i class="fa-solid fa-lock"></i>
-                    </span>
+                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                    <i className="fa-solid fa-lock"></i>
+                  </span>
                     <input
                       type="password"
                       id="confirmPassword"
@@ -295,6 +330,14 @@ const adminUser: User = {
                 </div>
               )}
               
+                             {/* 滑块验证 */}
+               <AdvancedSliderCaptcha
+                 onSuccess={handleCaptchaSuccess}
+                 onFail={handleCaptchaFail}
+                 disabled={loading}
+                 difficulty="medium"
+               />
+              
               {/* 提交按钮 */}
                <button
                 type="submit"
@@ -309,7 +352,7 @@ const adminUser: User = {
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
-                    <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                    <i className="fa-solid fa-spinner fa-spin mr-2"></i>
                     <span>处理中...</span>
                   </div>
                 ) : isLogin ? (
@@ -322,7 +365,7 @@ const adminUser: User = {
                {/* 实名认证提示 */}
                {!isLogin && (
                  <div className="mt-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
-                   <i class="fa-solid fa-info-circle mr-2"></i>
+                   <i className="fa-solid fa-info-circle mr-2"></i>
                    <span>注册成功后需完成实名认证才能使用平台功能</span>
                  </div>
                )}
@@ -331,14 +374,7 @@ const adminUser: User = {
                <div className="mt-6 text-center">
                  <button
                    type="button"
-                   onClick={() => {
-                     setIsLogin(!isLogin);
-                     setError('');
-                     setPhone('');
-                     setPassword('');
-                     setConfirmPassword('');
-                     setChildGrade('');
-                   }}
+                   onClick={resetForm}
                    className="text-blue-600 hover:text-blue-800 font-medium focus:outline-none"
                  >
                    {isLogin 

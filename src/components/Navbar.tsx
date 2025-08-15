@@ -52,7 +52,7 @@ const Navbar = () => {
                       老师列表
                     </Link>
                     <Link to="/parent/tasks" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                      发布任务
+                      我的任务
                     </Link>
                   </>
                 )}
