@@ -40,19 +40,21 @@ Failed during stage 'Install dependencies': dependency_installation script retur
 ### netlify.toml
 ```toml
 [build]
-  command = "pnpm install && pnpm build"
+  command = "node prebuild.js"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
+  PNPM_FLAGS = "--no-frozen-lockfile"
+  CI = "true"
 ```
 
 ### 项目文件状态
-- ✅ `pnpm-lock.yaml` - 已同步
+- ✅ `pnpm-lock.yaml` - 完全重新生成并同步
 - ✅ `.npmrc` - 新增配置
 - ✅ `package.json` - 移除problematic脚本
-- ✅ `netlify.toml` - 简化配置
+- ✅ `netlify.toml` - 智能构建配置
+- ✅ `prebuild.js` - 新增强健构建脚本
 
 ## 🧪 测试结果
 
