@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { CreateTaskRequest } from '@/models/Task';
 import { toast } from 'sonner';
@@ -72,45 +72,54 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
     }
     
     // 如果提供了年级，尝试自动计算价格
-    if (initialData?.grade) {
-      calculatePrice();
+    if (initialData?.grade && initialData?.duration) {
+      const newPrice = calculatePrice(initialData.grade, initialData.duration);
+      if (newPrice > 0) {
+        setFormData(prev => ({ ...prev, price: newPrice }));
+      }
     }
-  }, [initialData]);
+  }, [initialData, calculatePrice]);
   
-  // 根据年级和课时计算价格
-  const calculatePrice = () => {
-    if (!formData.grade || !formData.duration) return;
+  // 根据年级和课时计算价格 - Memoized to prevent unnecessary recalculations
+  const calculatePrice = useCallback((grade: string, duration: number) => {
+    if (!grade || !duration || duration <= 0) return 0;
     
     // 根据年级设置不同基础价格
     let basePrice = 100; // 默认价格
     
     // 初中（7-9年级）加价
-    if (['7', '8', '9'].includes(formData.grade)) {
+    if (['7', '8', '9'].includes(grade)) {
       basePrice = 150;
     } 
     // 高中（10-12年级）加价更多
-    else if (['10', '11', '12'].includes(formData.grade)) {
+    else if (['10', '11', '12'].includes(grade)) {
       basePrice = 200;
     }
     
     // 计算总价
-    const totalPrice = basePrice * formData.duration;
-    setFormData(prev => ({ ...prev, price: totalPrice }));
-  };
+    return basePrice * duration;
+  }, []);
   
   // 处理表单字段变化
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'duration' ? parseInt(value) || 0 : value
-    }));
-    
-    // 如果修改了年级或课时，重新计算价格
-    if (name === 'grade' || name === 'duration') {
-      calculatePrice();
-    }
+    setFormData(prev => {
+      const updatedFormData = {
+        ...prev,
+        [name]: name === 'duration' ? parseInt(value) || 0 : value
+      };
+      
+      // 如果修改了年级或课时，重新计算价格
+      if (name === 'grade' || name === 'duration') {
+        const newPrice = calculatePrice(updatedFormData.grade, updatedFormData.duration);
+        if (newPrice > 0) {
+          updatedFormData.price = newPrice;
+        }
+      }
+      
+      return updatedFormData;
+    });
     
     // 清除该字段的错误
     if (errors[name]) {

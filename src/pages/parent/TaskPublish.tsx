@@ -11,6 +11,7 @@ export default function TaskPublish() {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialData, setInitialData] = useState<Partial<CreateTaskRequest>>({});
+  const [teachers, setTeachers] = useState<Array<{ id: string; name?: string }>>([]);
   
   // 解析URL参数获取老师ID
   useEffect(() => {
@@ -28,6 +29,13 @@ export default function TaskPublish() {
     if (currentUser && currentUser.childGrade) {
       setInitialData(prev => ({ ...prev, grade: currentUser.childGrade }));
     }
+    
+    // 获取可用的老师列表
+    const teacherUsers = users.filter((u: any) => u.role === 'teacher');
+    setTeachers(teacherUsers.map((teacher: any) => ({
+      id: teacher.id,
+      name: teacher.name || `老师${teacher.id}`
+    })));
   }, [userId, location.search]);
   
   // 处理任务提交
@@ -88,6 +96,7 @@ export default function TaskPublish() {
           initialData={initialData}
           onSubmit={handleTaskSubmit}
           isSubmitting={isSubmitting}
+          teachers={teachers}
         />
       </div>
     </div>
