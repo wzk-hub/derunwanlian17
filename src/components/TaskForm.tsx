@@ -156,6 +156,10 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
       newErrors.price = '请输入有效的价格';
     }
     
+    if (!formData.studentSchool || !formData.studentSchool.trim()) {
+      newErrors.studentSchool = '请输入学生所在学校';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -245,7 +249,7 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         </div>
         <div>
           <label htmlFor="studentSchool" className="block text-sm font-medium text-gray-700 mb-1">
-            学校（可选）
+            学校 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -255,10 +259,15 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
             onChange={handleChange}
             className={cn(
               "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
-              "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              errors.studentSchool 
+                ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             )}
             placeholder="请输入学生所在学校"
           />
+          {errors.studentSchool && (
+            <p className="mt-1 text-sm text-red-600">{errors.studentSchool}</p>
+          )}
         </div>
       </div>
 
