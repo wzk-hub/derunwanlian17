@@ -246,6 +246,21 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => {
+                setActiveTab('teachers');
+                navigate('/admin/teachers');
+              }}
+              className={cn(
+                "flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
+                activeTab === 'teachers' 
+                  ? "bg-indigo-600 text-white" 
+                  : "text-gray-600 hover:bg-gray-100"
+              )}
+            >
+              <i className="fa-solid fa-user-graduate mr-2"></i>
+              老师管理
+            </button>
+            <button
+              onClick={() => {
                 setActiveTab('tasks');
                 navigate('/admin/tasks');
               }}
@@ -258,6 +273,21 @@ const AdminDashboard = () => {
             >
               <i className="fa-solid fa-tasks mr-2"></i>
               任务审核
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('taskPublish');
+                navigate('/admin/task-publish');
+              }}
+              className={cn(
+                "flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
+                activeTab === 'taskPublish' 
+                  ? "bg-indigo-600 text-white" 
+                  : "text-gray-600 hover:bg-gray-100"
+              )}
+            >
+              <i className="fa-solid fa-plus-circle mr-2"></i>
+              发布任务
             </button>
                          <button
                onClick={() => {

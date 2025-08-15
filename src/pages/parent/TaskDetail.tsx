@@ -1,17 +1,29 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
+import TeacherRatingComponent from '@/components/TeacherRating';
+import { TeacherRating } from '@/models/User';
 
 export default function ParentTaskDetail() {
 	const { userId } = useContext(AuthContext);
 	const { taskId } = useParams<{ taskId: string }>();
 	const navigate = useNavigate();
 	const [task, setTask] = useState<any | null>(null);
+	const [existingRating, setExistingRating] = useState<TeacherRating | null>(null);
 
 	useEffect(() => {
 		const all = JSON.parse(localStorage.getItem('tasks') || '[]');
 		const t = all.find((x: any) => x.id === taskId && x.publisherId === userId);
 		setTask(t || null);
+		
+		// 检查是否已有评分
+		if (t && t.assignedTeacherId) {
+			const ratings = JSON.parse(localStorage.getItem('teacherRatings') || '[]');
+			const rating = ratings.find((r: TeacherRating) => 
+				r.taskId === taskId && r.teacherId === t.assignedTeacherId
+			);
+			setExistingRating(rating || null);
+		}
 	}, [taskId, userId]);
 
 	const cancelTask = () => {
@@ -78,9 +90,24 @@ export default function ParentTaskDetail() {
 					<button onClick={() => navigate('/parent/messages')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">进入群聊</button>
 				)}
 				{task.status !== 'cancelled' && !task.chatGroupId && (
-					<button onClick={cancelTask} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">取消任务</button>
+					<button onClick={() => navigate('/parent/tasks')} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">返回列表</button>
 				)}
 			</div>
+
+			{/* 老师评分区域 */}
+			{task.status === 'completed' && task.assignedTeacherId && (
+				<div className="bg-white rounded-xl shadow-md p-6">
+					<h3 className="text-lg font-medium text-gray-900 mb-4">为老师评分</h3>
+					<TeacherRatingComponent
+						teacherId={task.assignedTeacherId}
+						teacherName={task.assignedTeacherName || '未知老师'}
+						taskId={task.id}
+						taskTitle={task.title}
+						existingRating={existingRating}
+						onRatingSubmit={(rating) => setExistingRating(rating)}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

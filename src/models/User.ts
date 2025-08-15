@@ -38,4 +38,30 @@ export interface User {
   price?: number; // 课时费用
   certificates?: string[]; // 资格证书
   paymentQrCode?: string; // 收款二维码
+  // 新增：老师评分相关
+  averageRating?: number; // 平均评分（1-100分）
+  totalRatings?: number; // 总评分次数
+  ratingHistory?: TeacherRating[]; // 评分历史记录
+  isPinned?: boolean; // 是否在精选老师页面置顶
+  pinnedAt?: Date; // 置顶时间
+  pinnedById?: string; // 置顶管理员ID
+  pinnedOrder?: number; // 置顶排序
+}
+
+/**
+ * 老师评分记录接口
+ */
+export interface TeacherRating {
+  id: string;
+  teacherId: string;
+  parentId: string;
+  parentName: string;
+  taskId: string;
+  taskTitle: string;
+  rating: number; // 1-100分
+  comment: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  updatedById?: string; // 管理员修改评分时的ID
+}
 }
