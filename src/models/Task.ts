@@ -32,6 +32,9 @@ export interface Task {
   paymentTransactionId?: string; // 支付交易ID
   rejectionReason?: string; // 拒绝原因
   chatGroupId?: string; // 关联的群聊ID
+  // 学生信息（可选）
+  studentName?: string;
+  studentSchool?: string;
 }
 
 /**
@@ -45,4 +48,7 @@ export interface CreateTaskRequest {
   duration: number;
   price: number;
   teacherId: string; // 选择老师后必填
+  // 学生信息（可选）
+  studentName?: string;
+  studentSchool?: string;
 }

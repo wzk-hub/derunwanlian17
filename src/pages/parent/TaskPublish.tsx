@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TaskForm from '@/components/TaskForm';
-import { CreateTaskRequest, Task, TaskStatus } from '@/models/Task';
+import { CreateTaskRequest, Task } from '@/models/Task';
 import { AuthContext } from '@/contexts/authContext';
 import { toast } from 'sonner';
 
@@ -11,6 +11,7 @@ export default function TaskPublish() {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialData, setInitialData] = useState<Partial<CreateTaskRequest>>({});
+  const [teachers, setTeachers] = useState<Array<{ id: string; name?: string }>>([]);
   
   // 解析URL参数获取老师ID
   useEffect(() => {
@@ -25,9 +26,25 @@ export default function TaskPublish() {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const currentUser = users.find((u: any) => u.id === userId);
     
-    if (currentUser && currentUser.childGrade) {
-      setInitialData(prev => ({ ...prev, grade: currentUser.childGrade }));
+    if (currentUser) {
+      if (currentUser.childGrade) {
+        setInitialData(prev => ({ ...prev, grade: currentUser.childGrade }));
+      }
+      if (currentUser.childName) {
+        setInitialData(prev => ({ ...prev, studentName: currentUser.childName }));
+      }
+      if (currentUser.childSchool) {
+        setInitialData(prev => ({ ...prev, studentSchool: currentUser.childSchool }));
+      }
     }
+    
+    // 加载老师列表
+    const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
+    const teacherList: Array<{ id: string; name?: string }> = Object.keys(teacherProfiles).map((id) => ({
+      id,
+      name: teacherProfiles[id]?.name || undefined
+    }));
+    setTeachers(teacherList);
   }, [userId, location.search]);
   
   // 处理任务提交
@@ -88,6 +105,7 @@ export default function TaskPublish() {
           initialData={initialData}
           onSubmit={handleTaskSubmit}
           isSubmitting={isSubmitting}
+          teachers={teachers}
         />
       </div>
     </div>
