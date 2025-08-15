@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
 import ParentDashboard from "@/pages/ParentDashboard";
 import TeacherDashboard from "@/pages/TeacherDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
@@ -112,12 +113,13 @@ export default function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-             <Route path="/login" element={authState.isAuthenticated ? 
-              <Navigate to={
-                 authState.userRole === 'parent' ? '/parent' : 
-                 authState.userRole === 'teacher' ? '/teacher' : 
-                 authState.userRole === 'admin' ? '/admin' : '/'
-              } replace /> : <Login />} />
+                          <Route path="/login" element={authState.isAuthenticated ? 
+               <Navigate to={
+                  authState.userRole === 'parent' ? '/parent' : 
+                  authState.userRole === 'teacher' ? '/teacher' : 
+                  authState.userRole === 'admin' ? '/admin' : '/'
+               } replace /> : <Login />} />
+             <Route path="/forgot" element={<ForgotPassword />} />
               <Route path="/parent/*" element={
                 <ProtectedRoute requiredRole="parent">
                   <ParentDashboard />
