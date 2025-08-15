@@ -261,18 +261,18 @@ const AdminDashboard = () => {
             </button>
                          <button
                onClick={() => {
-                 setActiveTab('messages');
-                 navigate('/admin/messages');
+                 setActiveTab('customerService');
+                 navigate('/admin/customer-service');
                }}
                className={cn(
                  "flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
-                 activeTab === 'messages' 
+                 activeTab === 'customerService' 
                    ? "bg-indigo-600 text-white" 
                    : "text-gray-600 hover:bg-gray-100"
                )}
              >
-               <i className="fa-solid fa-comments mr-2"></i>
-               消息管理
+               <i className="fa-solid fa-headset mr-2"></i>
+               客服中心
              </button>
              <button
                onClick={() => {

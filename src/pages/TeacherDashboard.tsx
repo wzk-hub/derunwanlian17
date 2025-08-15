@@ -2,6 +2,8 @@ import { useContext, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
+import CustomerServiceChatComponent from '@/components/CustomerServiceChat';
+import CustomerServiceNotification from '@/components/CustomerServiceNotification';
 
 // 老师仪表盘主页组件
 const TeacherDashboard = () => {
@@ -9,6 +11,7 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('profile');
+  const [isCustomerServiceOpen, setIsCustomerServiceOpen] = useState(false);
   
   // 获取当前用户信息
   useEffect(() => {
@@ -117,6 +120,24 @@ const TeacherDashboard = () => {
           <Outlet />
         </div>
       </div>
+
+      {/* 客服通知组件 */}
+      <CustomerServiceNotification onOpenChat={() => setIsCustomerServiceOpen(true)} />
+
+      {/* 客服入口按钮 */}
+      <button
+        onClick={() => setIsCustomerServiceOpen(true)}
+        className="fixed bottom-6 left-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 flex items-center justify-center z-40"
+        title="联系客服"
+      >
+        <i className="fa-solid fa-headset text-xl"></i>
+      </button>
+
+      {/* 客服对话组件 */}
+      <CustomerServiceChatComponent
+        isOpen={isCustomerServiceOpen}
+        onClose={() => setIsCustomerServiceOpen(false)}
+      />
     </div>
   );
 };
