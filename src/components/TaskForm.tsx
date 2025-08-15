@@ -8,7 +8,7 @@ interface TaskFormProps {
   initialData?: Partial<CreateTaskRequest>;
   onSubmit: (data: CreateTaskRequest) => void;
   isSubmitting: boolean;
-  teachers: Array<{ id: string; name?: string }>;
+  teachers?: Array<{ id: string; name?: string }>;
 }
 
 // 科目选项
@@ -40,7 +40,7 @@ const gradeOptions = [
   { value: '12', label: '高三' },
 ];
 
-export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers }: TaskFormProps) {
+export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers = [] }: TaskFormProps) {
   // 表单状态
   const [formData, setFormData] = useState<CreateTaskRequest>({
     title: initialData?.title || '',
@@ -49,6 +49,8 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
     grade: initialData?.grade || '',
     duration: initialData?.duration || 10,
     price: initialData?.price || 0,
+    studentName: initialData?.studentName || '',
+    studentSchool: initialData?.studentSchool || '',
     teacherId: initialData?.teacherId
   });
   
@@ -68,6 +70,8 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         grade: initialData.grade || prev.grade,
         duration: initialData.duration || prev.duration,
         price: initialData.price || prev.price,
+        studentName: initialData.studentName || prev.studentName,
+        studentSchool: initialData.studentSchool || prev.studentSchool,
       }));
     }
     
@@ -143,6 +147,10 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
     if (!formData.grade) {
       newErrors.grade = '请选择年级';
     }
+
+    if (!formData.studentSchool?.trim()) {
+      newErrors.studentSchool = '请输入学校名称';
+    }
     
     if (!formData.duration || formData.duration <= 0) {
       newErrors.duration = '请输入有效的课时数量';
@@ -169,6 +177,54 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* 学生基础信息 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1">
+            学生姓名
+          </label>
+          <input
+            type="text"
+            id="studentName"
+            name="studentName"
+            value={formData.studentName || ''}
+            onChange={handleChange}
+            className={cn(
+              "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+              errors.studentName 
+                ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            )}
+            placeholder="例如：张三"
+          />
+          {errors.studentName && (
+            <p className="mt-1 text-sm text-red-600">{errors.studentName}</p>
+          )}
+        </div>
+        <div>
+          <label htmlFor="studentSchool" className="block text-sm font-medium text-gray-700 mb-1">
+            学校 <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="studentSchool"
+            name="studentSchool"
+            value={formData.studentSchool}
+            onChange={handleChange}
+            className={cn(
+              "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+              errors.studentSchool 
+                ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            )}
+            placeholder="例如：北京市第一中学"
+          />
+          {errors.studentSchool && (
+            <p className="mt-1 text-sm text-red-600">{errors.studentSchool}</p>
+          )}
+        </div>
+      </div>
+
       {/* 任务标题 */}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -315,7 +371,7 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
           </label>
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-              <i class="fa-solid fa-yen-sign"></i>
+              <i className="fa-solid fa-yen-sign"></i>
             </span>
             <input
               type="number"
@@ -341,58 +397,59 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
             <p className="mt-1 text-sm text-red-600">{errors.price}</p>
           )}
         </div>
-         </div>
-         
-         {/* 老师选择 */}
-         <div>
-           <label htmlFor="teacherId" className="block text-sm font-medium text-gray-700 mb-1">
-             选择老师 <span className="text-red-500">*</span>
-           </label>
-           <select
-             id="teacherId"
-             name="teacherId"
-             value={formData.teacherId}
-             onChange={handleChange}
-             className={cn(
-               "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
-               errors.teacherId 
-                 ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
-                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-             )}
-           >
-             <option value="">请选择老师</option>
-             {teachers.map(teacher => (
-               <option key={teacher.id} value={teacher.id}>
-                 {teacher.name || `老师${teacher.id}`}
-               </option>
-             ))}
-           </select>
-           {errors.teacherId && (
-             <p className="mt-1 text-sm text-red-600">{errors.teacherId}</p>
-           )}
-         </div>
-         
-         {/* 提交按钮 */}
-         <div className="pt-4">
-           <button
-             type="submit"
-             disabled={isSubmitting}
+      </div>
+      
+      {/* 老师选择 */}
+      <div>
+        <label htmlFor="teacherId" className="block text-sm font-medium text-gray-700 mb-1">
+          选择老师
+        </label>
+        <select
+          id="teacherId"
+          name="teacherId"
+          value={formData.teacherId || ''}
+          onChange={handleChange}
+          className={cn(
+            "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+            errors.teacherId 
+              ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+          )}
+        >
+          <option value="">请选择老师（可选）</option>
+          {teachers.map(teacher => (
+            <option key={teacher.id} value={teacher.id}>
+              {teacher.name || `老师${teacher.id}`}
+            </option>
+          ))}
+        </select>
+        {errors.teacherId && (
+          <p className="mt-1 text-sm text-red-600">{errors.teacherId}</p>
+        )}
+        <p className="mt-1 text-xs text-gray-500">如已在老师列表中选择，将自动带入。</p>
+      </div>
+      
+      {/* 提交按钮 */}
+      <div className="pt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
           className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center">
-              <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+              <i className="fa-solid fa-spinner fa-spin mr-2"></i>
               <span>提交中...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center">
-              <i class="fa-solid fa-paper-plane mr-2"></i>
+              <i className="fa-solid fa-paper-plane mr-2"></i>
               <span>发布教学任务</span>
             </div>
           )}
         </button>
         <p className="mt-3 text-sm text-gray-500 text-center">
-          提交后将等待管理员审核，审核通过后老师可查看并接单
+          提交后可直接支付，管理员确认后将开启三方群聊
         </p>
       </div>
     </form>
