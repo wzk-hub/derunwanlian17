@@ -15,6 +15,7 @@ import ParentTaskDetail from "@/pages/parent/TaskDetail";
 import ParentTaskEdit from "@/pages/parent/TaskEdit";
 import ParentVerification from "@/pages/parent/Verification";
 import TeacherMessages from "@/pages/teacher/Messages";
+import TeacherTasks from "@/pages/teacher/Tasks";
 import TeacherProfile from "@/pages/teacher/Profile";
 import TeacherVerification from "@/pages/teacher/Verification";
 import { useState, useEffect } from "react";
@@ -135,7 +136,8 @@ export default function App() {
                  <TeacherDashboard />
                </ProtectedRoute>
              }>
-                 <Route path="profile" element={<TeacherProfile />} />
+                                   <Route path="profile" element={<TeacherProfile />} />
+                  <Route path="tasks" element={<TeacherTasks />} />
                  <Route path="verification" element={<TeacherVerification />} />
                  <Route path="messages" element={<TeacherMessages />} />
                <Route index element={<Navigate to="/teacher/profile" replace />} />
