@@ -13,6 +13,7 @@ interface TaskItem {
 	status: string;
 	teacherId?: string;
 	createdAt: string | Date;
+	isDeleted?: boolean;
 }
 
 const statusText: Record<string, { label: string; color: string }> = {
@@ -34,7 +35,7 @@ export default function ParentTasks() {
 	useEffect(() => {
 		if (!userId) return;
 		const all = JSON.parse(localStorage.getItem('tasks') || '[]');
-		const mine = all.filter((t: TaskItem) => t.publisherId === userId);
+		const mine = all.filter((t: TaskItem) => t.publisherId === userId && !t.isDeleted);
 		setTasks(mine);
 	}, [userId]);
 
@@ -42,11 +43,21 @@ export default function ParentTasks() {
 		navigate(`/parent/payment/${taskId}`);
 	};
 
+	const moveToTrash = (taskId: string) => {
+		const all = JSON.parse(localStorage.getItem('tasks') || '[]');
+		const next = all.map((t: any) => (t.id === taskId ? { ...t, isDeleted: true, deletedAt: new Date() } : t));
+		localStorage.setItem('tasks', JSON.stringify(next));
+		setTasks(next.filter((t: TaskItem) => t.publisherId === userId && !t.isDeleted));
+	};
+
 	return (
 		<div className="space-y-6">
-			<div>
-				<h2 className="text-2xl font-bold text-gray-800">我的任务</h2>
-				<p className="text-gray-500 mt-1">查看任务状态，继续支付或进入群聊</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h2 className="text-2xl font-bold text-gray-800">我的任务</h2>
+					<p className="text-gray-500 mt-1">查看任务状态，继续支付或进入群聊</p>
+				</div>
+				<button onClick={() => navigate('/parent/tasks/trash')} className="px-3 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200">回收站</button>
 			</div>
 
 			{tasks.length === 0 ? (
@@ -78,6 +89,9 @@ export default function ParentTasks() {
 								)}
 								{t.chatGroupId && (
 									<button onClick={() => navigate('/parent/messages')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">进入群聊</button>
+								)}
+								{!t.chatGroupId && (
+									<button onClick={() => moveToTrash(t.id)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">删除</button>
 								)}
 							</div>
 						</div>

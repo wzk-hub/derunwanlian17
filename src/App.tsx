@@ -6,6 +6,7 @@ import TeacherDashboard from "@/pages/TeacherDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import AdminTasks from "@/pages/admin/Tasks";
+import AdminSettlements from "@/pages/admin/Settlements";
 import TeacherList from "@/pages/parent/TeacherList";
 import TaskPublish from "@/pages/parent/TaskPublish";
 import Payment from "@/pages/parent/Payment";
@@ -13,6 +14,7 @@ import ParentMessages from "@/pages/parent/Messages";
 import ParentTasks from "@/pages/parent/Tasks";
 import ParentTaskDetail from "@/pages/parent/TaskDetail";
 import ParentTaskEdit from "@/pages/parent/TaskEdit";
+import TasksTrash from "@/pages/parent/TasksTrash";
 import ParentVerification from "@/pages/parent/Verification";
 import TeacherMessages from "@/pages/teacher/Messages";
 import TeacherTasks from "@/pages/teacher/Tasks";
@@ -125,7 +127,8 @@ export default function App() {
                  <Route path="tasks" element={<ParentTasks />} />
                  <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
                  <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
-                <Route path="tasks/new" element={<TaskPublish />} />
+                                  <Route path="tasks/new" element={<TaskPublish />} />
+                  <Route path="tasks/trash" element={<TasksTrash />} />
                 <Route path="payment/:taskId" element={<Payment />} />
                 <Route path="messages" element={<ParentMessages />} />
                 <Route path="verification" element={<ParentVerification />} />
@@ -145,12 +148,13 @@ export default function App() {
             <Route path="/admin/*" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
-              </ProtectedRoute>
-            }>
-              <Route path="tasks" element={<AdminTasks />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route index element={<Navigate to="/admin/tasks" replace />} />
-            </Route>
+                             </ProtectedRoute>
+             }>
+               <Route path="tasks" element={<AdminTasks />} />
+               <Route path="users" element={<UserManagement />} />
+               <Route path="settlements" element={<AdminSettlements />} />
+               <Route index element={<Navigate to="/admin/tasks" replace />} />
+             </Route>
             <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
           </Routes>
         </main>

@@ -25,9 +25,11 @@ export interface Task {
   approvedById?: string; // 审核管理员ID
   paymentConfirmedAt?: Date; // 支付确认时间
   paymentConfirmedById?: string; // 确认支付的管理员ID
+  paidAt?: Date; // 家长确认支付时间
   completedAt?: Date; // 完成时间
   settledAt?: Date; // 结算时间
   settledById?: string; // 结算管理员ID
+  settledAmount?: number; // 实际结算金额
   paymentMethod?: 'wechat' | 'alipay'; // 支付方式
   paymentTransactionId?: string; // 支付交易ID
   rejectionReason?: string; // 拒绝原因
@@ -39,6 +41,9 @@ export interface Task {
   // 新增：取消相关
   cancelledAt?: Date;
   cancelledById?: string;
+  // 新增：软删除
+  deletedAt?: Date;
+  isDeleted?: boolean;
 }
 
 /**
