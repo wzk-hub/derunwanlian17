@@ -16,6 +16,7 @@ const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const AdminTasks = lazy(() => import("@/pages/admin/Tasks"));
 const AdminSettlements = lazy(() => import("@/pages/admin/Settlements"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
+const AdminCustomerService = lazy(() => import("@/pages/admin/CustomerService"));
 const TeacherList = lazy(() => import("@/pages/parent/TeacherList"));
 const TaskPublish = lazy(() => import("@/pages/parent/TaskPublish"));
 const Payment = lazy(() => import("@/pages/parent/Payment"));
@@ -187,6 +188,7 @@ export default function App() {
                 <Route path="tasks" element={<AdminTasks />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="settlements" element={<AdminSettlements />} />
+                <Route path="customer-service" element={<AdminCustomerService />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route index element={<Navigate to="/admin/tasks" replace />} />
               </Route>

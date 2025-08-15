@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { Link, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
+import CustomerServiceButton from '@/components/CustomerServiceButton';
 
 // 家长仪表盘主页组件
 const ParentDashboard = () => {
@@ -132,6 +133,9 @@ const ParentDashboard = () => {
           <Outlet />
         </div>
       </div>
+      
+      {/* 客服入口 */}
+      <CustomerServiceButton />
     </div>
   );
 };

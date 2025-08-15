@@ -276,6 +276,21 @@ const AdminDashboard = () => {
              </button>
              <button
                onClick={() => {
+                 setActiveTab('customerService');
+                 navigate('/admin/customer-service');
+               }}
+               className={cn(
+                 "flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
+                 activeTab === 'customerService' 
+                   ? "bg-indigo-600 text-white" 
+                   : "text-gray-600 hover:bg-gray-100"
+               )}
+             >
+               <i className="fa-solid fa-headset mr-2"></i>
+               客服中心
+             </button>
+             <button
+               onClick={() => {
                  setActiveTab('settings');
                  navigate('/admin/settings');
                }}

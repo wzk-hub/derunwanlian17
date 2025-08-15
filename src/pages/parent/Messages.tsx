@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import CustomerServiceButton from '@/components/CustomerServiceButton';
 
 // 家长消息中心页面
 const ParentMessages = () => {
@@ -270,6 +271,9 @@ const ParentMessages = () => {
           </div>
         </div>
       )}
+      
+      {/* 客服入口 */}
+      <CustomerServiceButton />
     </div>
   );
 };

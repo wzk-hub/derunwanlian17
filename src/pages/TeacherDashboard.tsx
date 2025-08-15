@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
+import CustomerServiceButton from '@/components/CustomerServiceButton';
 
 // 老师仪表盘主页组件
 const TeacherDashboard = () => {
@@ -117,6 +118,9 @@ const TeacherDashboard = () => {
           <Outlet />
         </div>
       </div>
+      
+      {/* 客服入口 */}
+      <CustomerServiceButton />
     </div>
   );
 };
