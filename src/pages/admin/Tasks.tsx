@@ -1,9 +1,11 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '@/contexts/authContext';
 
 export default function AdminTasks() {
 	const { userId } = useContext(AuthContext);
 	const [tasks, setTasks] = useState<any[]>([]);
+	const [search, setSearch] = useState('');
+	const [statusFilter, setStatusFilter] = useState<string>('all');
 
 	useEffect(() => {
 		const all = JSON.parse(localStorage.getItem('tasks') || '[]');
@@ -21,23 +23,22 @@ export default function AdminTasks() {
 		updateTask(id, (t) => ({ ...t, status: 'approved', approvedAt: new Date(), approvedById: userId }));
 	};
 	const confirmPayment = (id: string) => {
-		// 创建群聊并标记为 assigned
 		const chatGroupId = `chat-${Date.now()}`;
-		// 保存群聊
 		const chatGroups = JSON.parse(localStorage.getItem('chatGroups') || '{}');
+		const taskTitle = (tasks.find(t => t.id === id)?.title) || '教学任务';
+		const target = tasks.find(t => t.id === id);
 		chatGroups[chatGroupId] = {
 			id: chatGroupId,
 			taskId: id,
-			taskTitle: (tasks.find(t => t.id === id)?.title) || '教学任务',
+			taskTitle,
 			members: [
-				{ id: tasks.find(t => t.id === id)?.publisherId, role: 'parent' },
-				{ id: tasks.find(t => t.id === id)?.teacherId, role: 'teacher' },
+				{ id: target?.publisherId, role: 'parent' },
+				{ id: target?.teacherId, role: 'teacher' },
 				{ id: userId, role: 'admin' }
 			],
 			createdAt: new Date()
 		};
 		localStorage.setItem('chatGroups', JSON.stringify(chatGroups));
-		// 欢迎消息
 		const messages = JSON.parse(localStorage.getItem('messages') || '{}');
 		messages[chatGroupId] = [
 			{
@@ -55,11 +56,48 @@ export default function AdminTasks() {
 		updateTask(id, (t) => ({ ...t, status: 'payment_rejected', rejectionReason: '支付未确认', updatedAt: new Date() }));
 	};
 
-	const rows = tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	const rows = useMemo(() => {
+		const s = search.trim().toLowerCase();
+		return tasks
+			.filter((t) => (statusFilter === 'all' ? true : t.status === statusFilter))
+			.filter((t) => (s ? `${t.title} ${t.subject} ${t.grade}`.toLowerCase().includes(s) : true))
+			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	}, [tasks, search, statusFilter]);
+
+	const stats = useMemo(() => {
+		const grouped: Record<string, number> = {};
+		tasks.forEach(t => { grouped[t.status] = (grouped[t.status] || 0) + 1; });
+		return grouped;
+	}, [tasks]);
 
 	return (
 		<div className="space-y-6">
 			<h2 className="text-2xl font-bold text-gray-800">任务审核与支付确认</h2>
+
+			{/* 快捷统计 */}
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+				{['pending','approved','payment_pending','payment_rejected','assigned'].map((k) => (
+					<div key={k} className="bg-white rounded-lg border p-3 text-sm text-gray-700 flex items-center justify-between">
+						<span>{k}</span>
+						<span className="font-semibold">{stats[k] || 0}</span>
+					</div>
+				))}
+			</div>
+
+			{/* 筛选搜索 */}
+			<div className="flex flex-col md:flex-row gap-3 items-center">
+				<input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="搜索标题/科目/年级" className="w-full md:w-72 px-3 py-2 border rounded"/>
+				<select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 border rounded">
+					<option value="all">全部状态</option>
+					<option value="pending">待审核</option>
+					<option value="approved">已审核</option>
+					<option value="payment_pending">待管理员确认</option>
+					<option value="payment_rejected">支付被驳回</option>
+					<option value="assigned">已建群</option>
+					<option value="cancelled">已取消</option>
+				</select>
+			</div>
+
 			<div className="bg-white rounded-xl shadow-md overflow-hidden">
 				<table className="min-w-full">
 					<thead className="bg-gray-50">

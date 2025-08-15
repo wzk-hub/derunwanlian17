@@ -23,6 +23,7 @@ const statusText: Record<string, { label: string; color: string }> = {
 	assigned: { label: '已建群', color: 'bg-green-100 text-green-700' },
 	in_progress: { label: '进行中', color: 'bg-green-100 text-green-700' },
 	completed: { label: '已完成', color: 'bg-gray-100 text-gray-700' },
+	cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-500' },
 };
 
 export default function ParentTasks() {
@@ -59,7 +60,9 @@ export default function ParentTasks() {
 						<div key={t.id} className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
 							<div className="flex items-start justify-between">
 								<div>
-									<h3 className="text-lg font-medium text-gray-800">{t.title}</h3>
+									<button onClick={() => navigate(`/parent/tasks/${t.id}`)} className="text-left">
+										<h3 className="text-lg font-medium text-gray-800 hover:text-blue-700">{t.title}</h3>
+									</button>
 									<p className="text-gray-500 text-sm mt-1">课时：{t.duration} 小时 · 金额：¥{Number(t.price).toFixed(2)}</p>
 								</div>
 								<span className={`px-2 py-1 rounded text-xs font-medium ${statusText[t.status]?.color || 'bg-gray-100 text-gray-700'}`}>

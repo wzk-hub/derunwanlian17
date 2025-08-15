@@ -3,7 +3,7 @@
  */
 
 // 任务状态类型
-export type TaskStatus = 'pending' | 'approved' | 'rejected' | 'payment_pending' | 'paid' | 'assigned' | 'in_progress' | 'completed' | 'settled';
+export type TaskStatus = 'pending' | 'approved' | 'rejected' | 'payment_pending' | 'paid' | 'assigned' | 'in_progress' | 'completed' | 'settled' | 'cancelled';
 
 // 任务接口定义
 export interface Task {
@@ -36,6 +36,9 @@ export interface Task {
   studentName?: string;
   studentSchool?: string;
   teacherId?: string; // 选定的老师ID（家长在发布时可选）
+  // 新增：取消相关
+  cancelledAt?: Date;
+  cancelledById?: string;
 }
 
 /**
