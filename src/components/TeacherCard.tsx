@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { AuthContext } from '@/contexts/authContext';
 import { cn, calculateDisplayPrice } from '@/lib/utils';
 import { toast } from 'sonner';
+import { LazyAvatar } from './LazyImage';
 
 // 老师信息接口定义
 interface Teacher {
@@ -46,10 +47,11 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
         <div className="flex items-start">
           {/* 头像 */}
           <div className="relative mr-4">
-            <img 
+            <LazyAvatar 
               src={avatarUrl} 
               alt={teacher.name} 
-              className="w-20 h-20 rounded-full object-cover border-4 border-blue-100"
+              size="lg"
+              className="border-4 border-blue-100"
             />
             {/* 评分 */}
             <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
@@ -83,7 +85,7 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
             </div>
             
             <div className="mt-2 flex items-center text-gray-600 text-sm">
-              <i class="fa-solid fa-user-graduate mr-1"></i>
+              <i className="fa-solid fa-user-graduate mr-1"></i>
               <span>{teacher.studentsCount}名学生</span>
               <span className="mx-2">•</span>
                  <i class="fa-solid fa-yen-sign mr-1"></i>
@@ -128,13 +130,13 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
               onClick={handleContact}
               className="py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              <i class="fa-solid fa-comment mr-2"></i>咨询
+              <i className="fa-solid fa-comment mr-2"></i>咨询
             </button>
              <button 
                 onClick={() => onSelectAndPay?.(teacher.id)}
                className="py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
-              <i class="fa-solid fa-check mr-2"></i>选择并支付
+              <i className="fa-solid fa-check mr-2"></i>选择并支付
             </button>
           </div>
       </div>

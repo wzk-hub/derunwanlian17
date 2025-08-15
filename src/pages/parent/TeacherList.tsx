@@ -1,9 +1,13 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TeacherCard from '@/components/TeacherCard';
 import GradeFilter from '@/components/GradeFilter';
 import { AuthContext } from '@/contexts/authContext';
 import { toast } from 'sonner';
+import useDebounce from '@/hooks/useDebounce';
+import { VirtualGrid } from '@/components/VirtualList';
+import { SkeletonCard } from '@/components/Skeleton';
+import { UserEmptyState } from '@/components/EmptyState';
 
 // 老师信息接口定义
 interface Teacher {
@@ -96,6 +100,7 @@ export default function TeacherList() {
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedTerm = useDebounce(searchTerm, 300);
   const [loading, setLoading] = useState(true);
   
   // 获取用户信息和孩子年级
@@ -140,8 +145,8 @@ export default function TeacherList() {
     }
     
     // 搜索筛选
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (debouncedTerm) {
+      const term = debouncedTerm.toLowerCase();
       result = result.filter(teacher => 
         teacher.name.toLowerCase().includes(term) || 
         teacher.subject.toLowerCase().includes(term) ||
@@ -150,7 +155,7 @@ export default function TeacherList() {
     }
     
     setFilteredTeachers(result);
-  }, [teachers, selectedGrades, searchTerm]);
+  }, [teachers, selectedGrades, debouncedTerm]);
   
   // 处理联系老师
   const handleContactTeacher = (teacherId: string) => {
@@ -191,59 +196,39 @@ export default function TeacherList() {
       
       {/* 老师列表 */}
       {loading ? (
-        // 加载状态
+        // 加载状态 - 使用骨架屏
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
-              <div className="p-6">
-                <div className="flex items-start">
-                  <div className="w-20 h-20 rounded-full bg-gray-200 mr-4"></div>
-                  <div className="flex-1">
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                </div>
-                <div className="mt-5">
-                  <div className="h-10 bg-gray-200 rounded"></div>
-                </div>
-              </div>
-            </div>
+            <SkeletonCard key={index} showImage={false} />
           ))}
         </div>
       ) : filteredTeachers.length > 0 ? (
-        // 老师列表
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTeachers.map(teacher => (
-            <TeacherCard 
-              key={teacher.id} 
-              teacher={teacher}
-              onContact={handleContactTeacher}
-            />
-          ))}
+        // 老师列表 - 使用虚拟化网格
+        <div className="h-[600px]">
+          <VirtualGrid
+            items={filteredTeachers}
+            height={600}
+            itemWidth={350}
+            itemHeight={280}
+            gap={24}
+            renderItem={(teacher) => (
+              <TeacherCard 
+                key={teacher.id} 
+                teacher={teacher}
+                onContact={handleContactTeacher}
+              />
+            )}
+          />
         </div>
       ) : (
-        // 无结果状态
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
-            <i class="fa-solid fa-search text-2xl text-blue-400"></i>
-          </div>
-          <h3 className="text-xl font-medium text-gray-800 mb-2">未找到符合条件的老师</h3>
-          <p className="text-gray-500 mb-6">尝试调整筛选条件或搜索关键词</p>
-          <button
-            onClick={() => {
-              setSelectedGrades([]);
-              setSearchTerm('');
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            清除所有筛选
-          </button>
-        </div>
+        // 无结果状态 - 使用空状态组件
+        <SearchEmptyState
+          searchTerm={searchTerm}
+          onClearSearch={() => {
+            setSelectedGrades([]);
+            setSearchTerm('');
+          }}
+        />
       )}
     </div>
   );

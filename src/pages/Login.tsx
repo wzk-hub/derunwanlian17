@@ -33,18 +33,23 @@ const Login = () => {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       const hasAdmin = users.some((user: User) => user.role === 'admin');
       
+      // 删除其他使用15931319952的账号
+      const filteredUsers = users.filter((u: any) => u.phone !== '15931319952');
+      
       if (!hasAdmin) {
-const adminUser: User = {
-  id: 'admin-1',
-  phone: 'derunwanlian888',
-  password: 'ljqwzk0103888',
-  role: 'admin',
-  name: '系统管理员',
-  createdAt: new Date()
-};
+        const adminUser: User = {
+          id: 'admin-1',
+          phone: '15931319952',
+          password: 'ljqwzk0103888',
+          role: 'admin',
+          name: '系统管理员',
+          createdAt: new Date()
+        };
         
-        users.push(adminUser);
-        localStorage.setItem('users', JSON.stringify(users));
+        filteredUsers.push(adminUser);
+        localStorage.setItem('users', JSON.stringify(filteredUsers));
+        users.length = 0;
+        users.push(...filteredUsers);
       }
     };
     
@@ -62,7 +67,7 @@ const adminUser: User = {
       return;
     }
     
-    if (!/^1[3-9]\d{9}$/.test(phone)) {
+    if (!isLogin && !/^1[3-9]\d{9}$/.test(phone)) {
       setError('请输入有效的手机号');
       return;
     }
@@ -86,11 +91,31 @@ const adminUser: User = {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       
       if (isLogin) {
-        // 登录逻辑
-        const user = users.find((u: User) => u.phone === phone && u.password === password);
+        // 登录逻辑（管理员支持账号/手机号登录）
+        console.log('尝试登录，手机号:', phone, '密码:', password);
+        console.log('当前用户列表:', users);
+        
+        // 简化用户查找逻辑
+        let user = null;
+        
+        // 先尝试精确匹配手机号和密码
+        user = users.find((u: any) => u.phone === phone && u.password === password);
+        
+        // 如果没找到，尝试匹配ID和密码（支持管理员用ID登录）
+        if (!user) {
+          user = users.find((u: any) => u.id === phone && u.password === password);
+        }
+        
+        // 如果还没找到，尝试管理员特殊匹配
+        if (!user && phone === '15931319952') {
+          user = users.find((u: any) => u.phone === '15931319952' && u.role === 'admin' && u.password === password);
+        }
+        
+        console.log('找到的用户:', user);
         
         if (user) {
-       setAuth(user.id, user.role, user.name);
+          console.log('登录成功，用户信息:', user);
+          setAuth(user.id, user.role, user.name);
           
           // 保存当前用户信息
           localStorage.setItem('currentUser', JSON.stringify(user));
@@ -104,6 +129,7 @@ const adminUser: User = {
             navigate('/admin');
           }
         } else {
+          console.log('登录失败，未找到匹配的用户');
           setError('手机号或密码不正确');
         }
       } else {
@@ -159,7 +185,7 @@ const adminUser: User = {
             
             {error && (
               <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-center">
-                <i class="fa-solid fa-exclamation-circle mr-2"></i>
+                <i className="fa-solid fa-exclamation-circle mr-2"></i>
                 {error}
               </div>
             )}
@@ -172,7 +198,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-phone"></i>
+                    <i className="fa-solid fa-phone"></i>
                   </span>
                   <input
                     type="tel"
@@ -193,7 +219,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-lock"></i>
+                    <i className="fa-solid fa-lock"></i>
                   </span>
                   <input
                     type="password"
@@ -216,7 +242,7 @@ const adminUser: User = {
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                      <i class="fa-solid fa-lock"></i>
+                      <i className="fa-solid fa-lock"></i>
                     </span>
                     <input
                       type="password"
@@ -349,6 +375,9 @@ const adminUser: User = {
                
 
             </form>
+            <div className="mt-4 text-center">
+              <a href="/forgot" className="text-blue-600 hover:underline text-sm">忘记密码？点此找回</a>
+            </div>
           </div>
         </div>
         

@@ -14,11 +14,24 @@ const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState<'alipay' | 'wechat'>('alipay');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   
-  // 收款二维码图片地址（用户提供）
+  // 读取管理员上传的二维码
+  const adminCodes = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
+  
+  // 收款二维码图片地址（支持本地与远程）
   const paymentQRCodes = {
+    alipay: adminCodes.alipay || "/assets/payments/alipay_qr.jpg",
+    wechat: adminCodes.wechat || "/assets/payments/wechat_qr.jpg"
+  } as const;
+  // 远程备用（若本地资源不可用）
+  const fallbackQRCodes = {
     alipay: "https://lf-code-agent.coze.cn/obj/x-ai-cn/269511283202/attachment/02e6c4502965b0048a69be9d5ea31f66_20250812165429.jpg",
     wechat: "https://lf-code-agent.coze.cn/obj/x-ai-cn/269511283202/attachment/674be7728981bf3bc90c58d61c4e7c5c_20250812165429.jpg"
-  };
+  } as const;
+  
+  const [qrSrcs, setQrSrcs] = useState({
+    alipay: paymentQRCodes.alipay,
+    wechat: paymentQRCodes.wechat
+  });
   
   // 获取任务详情
   useEffect(() => {
@@ -40,9 +53,10 @@ const Payment = () => {
         return;
       }
       
-      // 检查任务状态
-      if (currentTask.status !== 'approved') {
-        toast.error('该任务尚未通过审核或不处于待支付状态');
+      // 放宽状态要求：允许待审核、已审核、待确认支付等状态进入支付页
+      const allowedStatuses = ['pending', 'approved', 'payment_pending', 'payment_rejected'];
+      if (!allowedStatuses.includes(currentTask.status)) {
+        toast.error('该任务状态不支持支付');
         navigate('/parent');
         return;
       }
@@ -53,6 +67,17 @@ const Payment = () => {
     
     fetchTaskDetails();
   }, [taskId, userId, navigate]);
+  
+  // 加载失败时切换为远程二维码
+  useEffect(() => {
+    const imgAlipay = new Image();
+    imgAlipay.onerror = () => setQrSrcs(prev => ({ ...prev, alipay: fallbackQRCodes.alipay }));
+    imgAlipay.src = paymentQRCodes.alipay;
+
+    const imgWechat = new Image();
+    imgWechat.onerror = () => setQrSrcs(prev => ({ ...prev, wechat: fallbackQRCodes.wechat }));
+    imgWechat.src = paymentQRCodes.wechat;
+  }, []);
   
   // 处理支付完成确认
   const handlePaymentConfirm = () => {
@@ -77,7 +102,7 @@ const Payment = () => {
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     setPaymentCompleted(true);
     
-    toast.success('支付确认成功！');
+    toast.success('支付确认提交成功，等待管理员核验');
     
     // 2秒后返回任务列表
     setTimeout(() => {
@@ -107,7 +132,7 @@ const Payment = () => {
           onClick={() => navigate('/parent/tasks')}
           className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4"
         >
-          <i class="fa-solid fa-arrow-left mr-2"></i>
+          <i className="fa-solid fa-arrow-left mr-2"></i>
           <span>返回任务列表</span>
         </button>
         
@@ -144,7 +169,7 @@ const Payment = () => {
           
           <div className="pt-2 mt-2 border-t border-gray-100 flex justify-between items-center">
             <span className="text-gray-800 font-medium">总费用：</span>
-            <span className="text-xl font-bold text-red-600">¥{task.price.toFixed(2)}</span>
+            <span className="text-xl font-bold text-red-600">¥{Number(task.price).toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -166,7 +191,7 @@ const Payment = () => {
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                 paymentMethod === 'alipay' ? 'bg-blue-100' : 'bg-gray-100'
               }`}>
-                <i class="fa-brands fa-alipay text-blue-600 text-xl"></i>
+                <i className="fa-brands fa-alipay text-blue-600 text-xl"></i>
               </div>
               <div className="ml-3">
                 <h4 className="font-medium">支付宝支付</h4>
@@ -192,7 +217,7 @@ const Payment = () => {
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                 paymentMethod === 'wechat' ? 'bg-green-100' : 'bg-gray-100'
               }`}>
-                <i class="fa-brands fa-weixin text-green-600 text-xl"></i>
+                <i className="fa-brands fa-weixin text-green-600 text-xl"></i>
               </div>
               <div className="ml-3">
                 <h4 className="font-medium">微信支付</h4>
@@ -215,7 +240,7 @@ const Payment = () => {
           
           <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 max-w-xs w-full">
             <img 
-              src={paymentQRCodes[paymentMethod]} 
+              src={qrSrcs[paymentMethod]} 
               alt={`${paymentMethod === 'alipay' ? '支付宝' : '微信'}收款码`}
               className="w-full h-auto rounded"
             />
@@ -223,7 +248,7 @@ const Payment = () => {
           
           <p className="text-gray-500 text-sm mt-4 text-center">
             请使用{paymentMethod === 'alipay' ? '支付宝' : '微信'}扫描上方二维码完成支付<br />
-            支付金额：<span className="font-medium text-red-600">¥{task.price.toFixed(2)}</span>
+            支付金额：<span className="font-medium text-red-600">¥{Number(task.price).toFixed(2)}</span>
           </p>
         </div>
         
@@ -240,19 +265,19 @@ const Payment = () => {
           >
             {paymentCompleted ? (
               <div className="flex items-center justify-center">
-                <i class="fa-solid fa-check-circle mr-2"></i>
+                <i className="fa-solid fa-check-circle mr-2"></i>
                 <span>支付已确认</span>
               </div>
             ) : (
               <div className="flex items-center justify-center">
-                <i class="fa-solid fa-check mr-2"></i>
+                <i className="fa-solid fa-check mr-2"></i>
                 <span>确认支付完成</span>
               </div>
             )}
           </button>
           
           <p className="text-xs text-gray-500 mt-2">
-            提示：完成支付后请点击上方按钮确认，以便老师及时开始教学任务
+            提示：完成支付后请点击上方按钮确认，管理员核验通过后将拉起三方群聊
           </p>
         </div>
       </div>

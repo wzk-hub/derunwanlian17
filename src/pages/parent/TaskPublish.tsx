@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TaskForm from '@/components/TaskForm';
-import { CreateTaskRequest, Task, TaskStatus } from '@/models/Task';
+import { CreateTaskRequest, Task } from '@/models/Task';
 import { AuthContext } from '@/contexts/authContext';
 import { toast } from 'sonner';
 
@@ -11,6 +11,7 @@ export default function TaskPublish() {
   const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialData, setInitialData] = useState<Partial<CreateTaskRequest>>({});
+  const [teacherOptions, setTeacherOptions] = useState<Array<{ id: string; name?: string }>>([]);
   
   // 解析URL参数获取老师ID
   useEffect(() => {
@@ -28,6 +29,12 @@ export default function TaskPublish() {
     if (currentUser && currentUser.childGrade) {
       setInitialData(prev => ({ ...prev, grade: currentUser.childGrade }));
     }
+
+    // 准备可选老师列表（从用户表中取老师角色）
+    const teachers = users
+      .filter((u: any) => u.role === 'teacher')
+      .map((t: any) => ({ id: t.id, name: t.name }));
+    setTeacherOptions(teachers);
   }, [userId, location.search]);
   
   // 处理任务提交
@@ -48,20 +55,17 @@ export default function TaskPublish() {
           publisherId: userId!,
           createdAt: new Date(),
           updatedAt: new Date()
-        };
-        
-        // 如果已选择老师，直接跳转到支付页面
-        if (taskData.teacherId) {
-          existingTasks.push(newTask);
-          localStorage.setItem('tasks', JSON.stringify(existingTasks));
-          toast.success('任务创建成功，正在跳转到支付页面');
-          navigate(`/parent/payment/${newTask.id}`);
-          return;
-        }
+        } as Task;
         
         // 保存新任务
         existingTasks.push(newTask);
         localStorage.setItem('tasks', JSON.stringify(existingTasks));
+        
+        if (taskData.teacherId) {
+          toast.success('任务创建成功，正在跳转到支付页面');
+          navigate(`/parent/payment/${newTask.id}`);
+          return;
+        }
         
         toast.success('任务发布成功，等待管理员审核');
         navigate('/parent/tasks');
@@ -79,7 +83,7 @@ export default function TaskPublish() {
       <div>
         <h2 className="text-2xl font-bold text-gray-800">发布教学任务</h2>
         <p className="text-gray-500 mt-1">
-          填写以下信息发布教学任务需求，我们将帮助您找到合适的老师
+          填写学生信息与辅导需求，选择老师并支付后等待管理员确认
         </p>
       </div>
       
@@ -88,6 +92,7 @@ export default function TaskPublish() {
           initialData={initialData}
           onSubmit={handleTaskSubmit}
           isSubmitting={isSubmitting}
+          teachers={teacherOptions}
         />
       </div>
     </div>

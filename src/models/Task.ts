@@ -3,7 +3,7 @@
  */
 
 // 任务状态类型
-export type TaskStatus = 'pending' | 'approved' | 'rejected' | 'payment_pending' | 'paid' | 'assigned' | 'in_progress' | 'completed' | 'settled';
+export type TaskStatus = 'pending' | 'approved' | 'rejected' | 'payment_pending' | 'paid' | 'assigned' | 'in_progress' | 'completed' | 'settled' | 'cancelled';
 
 // 任务接口定义
 export interface Task {
@@ -25,13 +25,25 @@ export interface Task {
   approvedById?: string; // 审核管理员ID
   paymentConfirmedAt?: Date; // 支付确认时间
   paymentConfirmedById?: string; // 确认支付的管理员ID
+  paidAt?: Date; // 家长确认支付时间
   completedAt?: Date; // 完成时间
   settledAt?: Date; // 结算时间
   settledById?: string; // 结算管理员ID
+  settledAmount?: number; // 实际结算金额
   paymentMethod?: 'wechat' | 'alipay'; // 支付方式
   paymentTransactionId?: string; // 支付交易ID
   rejectionReason?: string; // 拒绝原因
   chatGroupId?: string; // 关联的群聊ID
+  // 新增：学生信息与选定老师
+  studentName?: string;
+  studentSchool?: string;
+  teacherId?: string; // 选定的老师ID（家长在发布时可选）
+  // 新增：取消相关
+  cancelledAt?: Date;
+  cancelledById?: string;
+  // 新增：软删除
+  deletedAt?: Date;
+  isDeleted?: boolean;
 }
 
 /**
@@ -44,5 +56,9 @@ export interface CreateTaskRequest {
   grade: string;
   duration: number;
   price: number;
-  teacherId: string; // 选择老师后必填
+  // 新增学生信息
+  studentName?: string;
+  studentSchool: string;
+  // 老师在发布时可选
+  teacherId?: string; // 选择老师后可填
 }

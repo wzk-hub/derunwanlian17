@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
+import { debugAdminAccount, forceCreateAdminAccount, testLogin } from '@/utils/debugAdminAccount';
+import { quickFixAdminLogin, resetToDefaultState } from '@/utils/fixAdminLogin';
 
 export default function Home() {
   const { isAuthenticated, userRole } = useContext(AuthContext);
@@ -34,7 +36,7 @@ export default function Home() {
               为家长找到最合适的老师，为老师提供展示才华的平台，共同助力孩子的教育成长
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 items-center">
               {isAuthenticated ? (
                 <Link 
                   to={userRole === 'parent' ? '/parent' : 
@@ -58,6 +60,46 @@ export default function Home() {
                   >
                     了解更多
                   </Link>
+                  <Link to="/forgot" className="text-blue-600 hover:underline text-sm">忘记密码？点此找回</Link>
+                  
+                  {/* 调试功能 - 仅开发环境显示 */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-800 text-sm mb-2">调试功能（仅开发环境）</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        <button 
+                          onClick={() => debugAdminAccount()} 
+                          className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                        >
+                          调试账号
+                        </button>
+                        <button 
+                          onClick={() => forceCreateAdminAccount()} 
+                          className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                        >
+                          创建管理员
+                        </button>
+                        <button 
+                          onClick={() => testLogin('15931319952', 'ljqwzk0103888')} 
+                          className="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700"
+                        >
+                          测试登录
+                        </button>
+                        <button 
+                          onClick={() => quickFixAdminLogin()} 
+                          className="px-3 py-1 bg-orange-600 text-white text-xs rounded hover:bg-orange-700"
+                        >
+                          快速修复
+                        </button>
+                        <button 
+                          onClick={() => resetToDefaultState()} 
+                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                        >
+                          重置系统
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -78,7 +120,7 @@ export default function Home() {
             {/* 特点1 */}
             <div className="bg-white rounded-xl shadow-xl p-8 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                <i class="fa-solid fa-user-graduate text-2xl text-blue-600"></i>
+                <i className="fa-solid fa-user-graduate text-2xl text-blue-600"></i>
               </div>
               <h3 className="text-xl font-bold text-center text-gray-800 mb-4">优质师资</h3>
               <p className="text-gray-600 text-center">
@@ -89,7 +131,7 @@ export default function Home() {
             {/* 特点2 */}
             <div className="bg-white rounded-xl shadow-xl p-8 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                <i class="fa-solid fa-briefcase text-2xl text-blue-600"></i>
+                <i className="fa-solid fa-briefcase text-2xl text-blue-600"></i>
               </div>
               <h3 className="text-xl font-bold text-center text-gray-800 mb-4">精准匹配</h3>
               <p className="text-gray-600 text-center">
@@ -100,7 +142,7 @@ export default function Home() {
             {/* 特点3 */}
             <div className="bg-white rounded-xl shadow-xl p-8 transform transition-all hover:-translate-y-2 hover:shadow-2xl">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
-                <i class="fa-solid fa-comments text-2xl text-blue-600"></i>
+                <i className="fa-solid fa-comments text-2xl text-blue-600"></i>
               </div>
               <h3 className="text-xl font-bold text-center text-gray-800 mb-4">便捷沟通</h3>
               <p className="text-gray-600 text-center">
