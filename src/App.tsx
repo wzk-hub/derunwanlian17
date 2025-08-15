@@ -47,6 +47,16 @@ export default function App() {
     }
   }, []);
 
+  // 确保管理员账号存在（防止首次未访问登录页导致未初始化）
+  useEffect(() => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const hasAdmin = users.some((u: any) => u.role === 'admin');
+    if (!hasAdmin) {
+      users.push({ id: 'admin-1', phone: 'derunwanlian888', password: 'ljqwzk0103888', role: 'admin', name: '系统管理员', createdAt: new Date() });
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+  }, []);
+
   const setAuth = (userId: string, role: string, name?: string) => {
     setAuthState({
       isAuthenticated: true,
@@ -113,40 +123,40 @@ export default function App() {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
-                          <Route path="/login" element={authState.isAuthenticated ? 
+                           <Route path="/login" element={authState.isAuthenticated ? 
                <Navigate to={
                   authState.userRole === 'parent' ? '/parent' : 
                   authState.userRole === 'teacher' ? '/teacher' : 
                   authState.userRole === 'admin' ? '/admin' : '/'
                } replace /> : <Login />} />
-             <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
               <Route path="/parent/*" element={
                 <ProtectedRoute requiredRole="parent">
                   <ParentDashboard />
                 </ProtectedRoute>
               }>
-                 <Route path="teachers" element={<TeacherList />} />
-                 <Route path="tasks" element={<ParentTasks />} />
-                 <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
-                 <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
+                   <Route path="teachers" element={<TeacherList />} />
+                   <Route path="tasks" element={<ParentTasks />} />
+                   <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
+                   <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
                                   <Route path="tasks/new" element={<TaskPublish />} />
-                  <Route path="tasks/trash" element={<TasksTrash />} />
-                <Route path="payment/:taskId" element={<Payment />} />
-                <Route path="messages" element={<ParentMessages />} />
-                <Route path="verification" element={<ParentVerification />} />
-                <Route index element={<Navigate to="/parent/teachers" replace />} />
-              </Route>
-             <Route path="/teacher/*" element={
-               <ProtectedRoute requiredRole="teacher">
-                 <TeacherDashboard />
-               </ProtectedRoute>
-             }>
-                                   <Route path="profile" element={<TeacherProfile />} />
-                  <Route path="tasks" element={<TeacherTasks />} />
-                 <Route path="verification" element={<TeacherVerification />} />
-                 <Route path="messages" element={<TeacherMessages />} />
-               <Route index element={<Navigate to="/teacher/profile" replace />} />
-             </Route>
+                   <Route path="tasks/trash" element={<TasksTrash />} />
+                  <Route path="payment/:taskId" element={<Payment />} />
+                  <Route path="messages" element={<ParentMessages />} />
+                  <Route path="verification" element={<ParentVerification />} />
+                  <Route index element={<Navigate to="/parent/teachers" replace />} />
+                </Route>
+               <Route path="/teacher/*" element={
+                 <ProtectedRoute requiredRole="teacher">
+                   <TeacherDashboard />
+                 </ProtectedRoute>
+               }>
+                                     <Route path="profile" element={<TeacherProfile />} />
+                   <Route path="tasks" element={<TeacherTasks />} />
+                   <Route path="verification" element={<TeacherVerification />} />
+                   <Route path="messages" element={<TeacherMessages />} />
+                <Route index element={<Navigate to="/teacher/profile" replace />} />
+               </Route>
             <Route path="/admin/*" element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
