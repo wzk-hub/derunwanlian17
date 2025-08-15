@@ -2,30 +2,31 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import ForgotPassword from "@/pages/ForgotPassword";
-import ParentDashboard from "@/pages/ParentDashboard";
-import TeacherDashboard from "@/pages/TeacherDashboard";
-import AdminDashboard from "@/pages/AdminDashboard";
-import UserManagement from "@/pages/admin/UserManagement";
-import AdminTasks from "@/pages/admin/Tasks";
-import AdminSettlements from "@/pages/admin/Settlements";
-import AdminSettings from "@/pages/admin/Settings";
-import TeacherList from "@/pages/parent/TeacherList";
-import TaskPublish from "@/pages/parent/TaskPublish";
-import Payment from "@/pages/parent/Payment";
-import ParentMessages from "@/pages/parent/Messages";
-import ParentTasks from "@/pages/parent/Tasks";
-import ParentTaskDetail from "@/pages/parent/TaskDetail";
-import ParentTaskEdit from "@/pages/parent/TaskEdit";
-import TasksTrash from "@/pages/parent/TasksTrash";
-import ParentVerification from "@/pages/parent/Verification";
-import TeacherMessages from "@/pages/teacher/Messages";
-import TeacherTasks from "@/pages/teacher/Tasks";
-import TeacherProfile from "@/pages/teacher/Profile";
-import TeacherVerification from "@/pages/teacher/Verification";
-import { useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { AuthContext } from '@/contexts/authContext';
 import Navbar from "@/components/Navbar";
 import { getLocalStorageItem } from "@/lib/utils";
+
+const ParentDashboard = lazy(() => import("@/pages/ParentDashboard"));
+const TeacherDashboard = lazy(() => import("@/pages/TeacherDashboard"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
+const AdminTasks = lazy(() => import("@/pages/admin/Tasks"));
+const AdminSettlements = lazy(() => import("@/pages/admin/Settlements"));
+const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
+const TeacherList = lazy(() => import("@/pages/parent/TeacherList"));
+const TaskPublish = lazy(() => import("@/pages/parent/TaskPublish"));
+const Payment = lazy(() => import("@/pages/parent/Payment"));
+const ParentMessages = lazy(() => import("@/pages/parent/Messages"));
+const ParentTasks = lazy(() => import("@/pages/parent/Tasks"));
+const ParentTaskDetail = lazy(() => import("@/pages/parent/TaskDetail"));
+const ParentTaskEdit = lazy(() => import("@/pages/parent/TaskEdit"));
+const TasksTrash = lazy(() => import("@/pages/parent/TasksTrash"));
+const ParentVerification = lazy(() => import("@/pages/parent/Verification"));
+const TeacherMessages = lazy(() => import("@/pages/teacher/Messages"));
+const TeacherTasks = lazy(() => import("@/pages/teacher/Tasks"));
+const TeacherProfile = lazy(() => import("@/pages/teacher/Profile"));
+const TeacherVerification = lazy(() => import("@/pages/teacher/Verification"));
 
 export default function App() {
   const [authState, setAuthState] = useState({
@@ -107,6 +108,13 @@ export default function App() {
     return children;
   };
 
+  const Fallback = (
+    <div className="w-full py-16 flex items-center justify-center">
+      <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600 mr-3"></div>
+      <span className="text-gray-600">页面加载中...</span>
+    </div>
+  );
+
   return (
     <AuthContext.Provider
       value={{ 
@@ -122,55 +130,57 @@ export default function App() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-                           <Route path="/login" element={authState.isAuthenticated ? 
-               <Navigate to={
-                  authState.userRole === 'parent' ? '/parent' : 
-                  authState.userRole === 'teacher' ? '/teacher' : 
-                  authState.userRole === 'admin' ? '/admin' : '/'
-               } replace /> : <Login />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-              <Route path="/parent/*" element={
-                <ProtectedRoute requiredRole="parent">
-                  <ParentDashboard />
-                </ProtectedRoute>
-              }>
-                   <Route path="teachers" element={<TeacherList />} />
-                   <Route path="tasks" element={<ParentTasks />} />
-                   <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
-                   <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
-                                  <Route path="tasks/new" element={<TaskPublish />} />
-                   <Route path="tasks/trash" element={<TasksTrash />} />
-                  <Route path="payment/:taskId" element={<Payment />} />
-                  <Route path="messages" element={<ParentMessages />} />
-                  <Route path="verification" element={<ParentVerification />} />
-                  <Route index element={<Navigate to="/parent/teachers" replace />} />
-                </Route>
+          <Suspense fallback={Fallback}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={authState.isAuthenticated ? 
+                <Navigate to={
+                   authState.userRole === 'parent' ? '/parent' : 
+                   authState.userRole === 'teacher' ? '/teacher' : 
+                   authState.userRole === 'admin' ? '/admin' : '/'
+                } replace /> : <Login />} />
+             <Route path="/forgot" element={<ForgotPassword />} />
+               <Route path="/parent/*" element={
+                 <ProtectedRoute requiredRole="parent">
+                   <ParentDashboard />
+                 </ProtectedRoute>
+               }>
+                    <Route path="teachers" element={<TeacherList />} />
+                    <Route path="tasks" element={<ParentTasks />} />
+                    <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
+                    <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
+                     <Route path="tasks/new" element={<TaskPublish />} />
+                    <Route path="tasks/trash" element={<TasksTrash />} />
+                   <Route path="payment/:taskId" element={<Payment />} />
+                   <Route path="messages" element={<ParentMessages />} />
+                   <Route path="verification" element={<ParentVerification />} />
+                   <Route index element={<Navigate to="/parent/teachers" replace />} />
+                 </Route>
                <Route path="/teacher/*" element={
                  <ProtectedRoute requiredRole="teacher">
                    <TeacherDashboard />
                  </ProtectedRoute>
                }>
-                                     <Route path="profile" element={<TeacherProfile />} />
+                   <Route path="profile" element={<TeacherProfile />} />
                    <Route path="tasks" element={<TeacherTasks />} />
                    <Route path="verification" element={<TeacherVerification />} />
                    <Route path="messages" element={<TeacherMessages />} />
-                <Route index element={<Navigate to="/teacher/profile" replace />} />
+                 <Route index element={<Navigate to="/teacher/profile" replace />} />
                </Route>
-            <Route path="/admin/*" element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminDashboard />
-                             </ProtectedRoute>
-             }>
-               <Route path="tasks" element={<AdminTasks />} />
-               <Route path="users" element={<UserManagement />} />
-               <Route path="settlements" element={<AdminSettlements />} />
-               <Route path="settings" element={<AdminSettings />} />
-               <Route index element={<Navigate to="/admin/tasks" replace />} />
-             </Route>
-            <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
-          </Routes>
+              <Route path="/admin/*" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }>
+                <Route path="tasks" element={<AdminTasks />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="settlements" element={<AdminSettlements />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route index element={<Navigate to="/admin/tasks" replace />} />
+              </Route>
+              <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </AuthContext.Provider>
