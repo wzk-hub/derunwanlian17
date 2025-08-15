@@ -80,11 +80,25 @@ export default function TaskPublish() {
   
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">发布教学任务</h2>
-        <p className="text-gray-500 mt-1">
-          填写学生信息与辅导需求，选择老师并支付后等待管理员确认
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">发布教学任务</h2>
+        <p className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed">
+          为您的孩子找到最合适的老师！请详细填写学生信息、学习需求和辅导目标，我们将为您匹配专业的老师，提供个性化的教学服务。
         </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center">
+            <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
+            <span>专业老师团队</span>
+          </div>
+          <div className="flex items-center">
+            <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
+            <span>个性化教学方案</span>
+          </div>
+          <div className="flex items-center">
+            <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
+            <span>全程质量保障</span>
+          </div>
+        </div>
       </div>
       
       <div className="bg-white rounded-xl shadow-md p-6 md:p-8">
