@@ -12,6 +12,7 @@ import Payment from "@/pages/parent/Payment";
 import ParentMessages from "@/pages/parent/Messages";
 import ParentTasks from "@/pages/parent/Tasks";
 import ParentTaskDetail from "@/pages/parent/TaskDetail";
+import ParentTaskEdit from "@/pages/parent/TaskEdit";
 import ParentVerification from "@/pages/parent/Verification";
 import TeacherMessages from "@/pages/teacher/Messages";
 import TeacherProfile from "@/pages/teacher/Profile";
@@ -122,6 +123,7 @@ export default function App() {
                  <Route path="teachers" element={<TeacherList />} />
                  <Route path="tasks" element={<ParentTasks />} />
                  <Route path="tasks/:taskId" element={<ParentTaskDetail />} />
+                 <Route path="tasks/:taskId/edit" element={<ParentTaskEdit />} />
                 <Route path="tasks/new" element={<TaskPublish />} />
                 <Route path="payment/:taskId" element={<Payment />} />
                 <Route path="messages" element={<ParentMessages />} />

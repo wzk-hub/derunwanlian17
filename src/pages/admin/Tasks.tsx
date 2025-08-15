@@ -1,6 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '@/contexts/authContext';
 
+function toCSV(rows: any[]): string {
+	const headers = ['标题','金额','状态','课时','年级','科目'];
+	const lines = rows.map(r => [r.title, r.price, r.status, r.duration, r.grade, r.subject].join(','));
+	return [headers.join(','), ...lines].join('\n');
+}
+
 export default function AdminTasks() {
 	const { userId } = useContext(AuthContext);
 	const [tasks, setTasks] = useState<any[]>([]);
@@ -70,6 +76,17 @@ export default function AdminTasks() {
 		return grouped;
 	}, [tasks]);
 
+	const exportCSV = () => {
+		const csv = toCSV(rows);
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `tasks_${Date.now()}.csv`;
+		a.click();
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="space-y-6">
 			<h2 className="text-2xl font-bold text-gray-800">任务审核与支付确认</h2>
@@ -96,6 +113,7 @@ export default function AdminTasks() {
 					<option value="assigned">已建群</option>
 					<option value="cancelled">已取消</option>
 				</select>
+				<button onClick={exportCSV} className="px-3 py-2 bg-gray-800 text-white rounded">导出CSV</button>
 			</div>
 
 			<div className="bg-white rounded-xl shadow-md overflow-hidden">

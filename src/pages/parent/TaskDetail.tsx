@@ -22,6 +22,29 @@ export default function ParentTaskDetail() {
 		navigate('/parent/tasks');
 	};
 
+	const repostTask = () => {
+		if (!task) return;
+		const all = JSON.parse(localStorage.getItem('tasks') || '[]');
+		const newTask = {
+			...task,
+			id: `task-${Date.now()}`,
+			status: 'pending',
+			createdAt: new Date(),
+			updatedAt: new Date(),
+			approvedAt: undefined,
+			approvedById: undefined,
+			paymentConfirmedAt: undefined,
+			paymentConfirmedById: undefined,
+			chatGroupId: undefined,
+			paymentTransactionId: undefined,
+			cancelledAt: undefined,
+			cancelledById: undefined,
+		};
+		all.push(newTask);
+		localStorage.setItem('tasks', JSON.stringify(all));
+		navigate(`/parent/payment/${newTask.id}`);
+	};
+
 	if (!task) {
 		return <div className="text-gray-500">未找到任务</div>;
 	}
@@ -45,10 +68,12 @@ export default function ParentTaskDetail() {
 				<p className="text-gray-700">状态：{task.status}</p>
 			</div>
 
-			<div className="flex gap-3">
+			<div className="flex flex-wrap gap-3">
+				<button onClick={() => navigate(`/parent/tasks/${task.id}/edit`)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">编辑</button>
 				{(task.status === 'pending' || task.status === 'approved' || task.status === 'payment_rejected' || task.status === 'payment_pending') && (
 					<button onClick={() => navigate(`/parent/payment/${task.id}`)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">选择并支付</button>
 				)}
+				<button onClick={repostTask} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">再次发布</button>
 				{task.chatGroupId && (
 					<button onClick={() => navigate('/parent/messages')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">进入群聊</button>
 				)}
