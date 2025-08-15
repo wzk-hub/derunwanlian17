@@ -14,6 +14,7 @@ import ParentVerification from "@/pages/parent/Verification";
 import TeacherMessages from "@/pages/teacher/Messages";
 import TeacherProfile from "@/pages/teacher/Profile";
 import TeacherVerification from "@/pages/teacher/Verification";
+import CaptchaTest from "@/pages/CaptchaTest";
 import { useState, useEffect } from "react";
 import { AuthContext } from '@/contexts/authContext';
 import Navbar from "@/components/Navbar";
@@ -140,6 +141,7 @@ export default function App() {
                 <AdminDashboard />
               </ProtectedRoute>
             } />
+            <Route path="/captcha-test" element={<CaptchaTest />} />
             <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
           </Routes>
         </main>
