@@ -12,6 +12,8 @@ const TeacherProfile = () => {
   const [saving, setSaving] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [certificatePreviews, setCertificatePreviews] = useState<string[]>([]);
+  const [profileStatus, setProfileStatus] = useState<'draft' | 'submitted' | 'approved' | 'rejected'>('draft');
+  const [adminFeedback, setAdminFeedback] = useState<string>('');
   
   // 老师资料表单状态
   const [formData, setFormData] = useState({
@@ -23,7 +25,12 @@ const TeacherProfile = () => {
     price: 0,
     avatar: '',
     certificates: [] as string[],
-    paymentQrCode: ''
+    paymentQrCode: '',
+    contactPhone: '',
+    contactWechat: '',
+    availableTime: '',
+    teachingStyle: '',
+    achievements: ''
   });
   
   // 收款码预览状态
@@ -99,7 +106,13 @@ const TeacherProfile = () => {
         grade: profileData.grade || [],
         price: profileData.price || 100,
         avatar: profileData.avatar || '',
-        certificates: profileData.certificates || []
+        certificates: profileData.certificates || [],
+        paymentQrCode: profileData.paymentQrCode || '',
+        contactPhone: profileData.contactPhone || '',
+        contactWechat: profileData.contactWechat || '',
+        availableTime: profileData.availableTime || '',
+        teachingStyle: profileData.teachingStyle || '',
+        achievements: profileData.achievements || ''
       });
       
       // 设置头像预览
@@ -112,6 +125,10 @@ const TeacherProfile = () => {
       
       // 设置证书预览
       setCertificatePreviews(profileData.certificates || []);
+      
+      // 设置资料状态
+      setProfileStatus(profileData.status || 'draft');
+      setAdminFeedback(profileData.adminFeedback || '');
       
       setLoading(false);
     };
@@ -308,7 +325,7 @@ const TeacherProfile = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  // 保存老师资料
+  // 保存老师资料（草稿）
   const handleSaveProfile = () => {
     if (!validateForm()) {
       return;
@@ -322,7 +339,11 @@ const TeacherProfile = () => {
         const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
         
         // 更新当前老师资料
-        teacherProfiles[userId!] = formData;
+        teacherProfiles[userId!] = {
+          ...formData,
+          status: 'draft',
+          updatedAt: new Date().toISOString()
+        };
         
         // 保存到localStorage
         localStorage.setItem('teacherProfiles', JSON.stringify(teacherProfiles));
@@ -341,10 +362,61 @@ const TeacherProfile = () => {
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
         
+        setProfileStatus('draft');
         toast.success('个人资料保存成功！');
       } catch (error) {
         console.error('保存个人资料失败:', error);
         toast.error('保存个人资料失败，请重试');
+      } finally {
+        setSaving(false);
+      }
+    }, 800);
+  };
+
+  // 提交资料审核
+  const handleSubmitForReview = () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    setSaving(true);
+    
+    setTimeout(() => {
+      try {
+        // 获取现有老师资料
+        const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
+        
+        // 更新当前老师资料
+        teacherProfiles[userId!] = {
+          ...formData,
+          status: 'submitted',
+          submittedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        // 保存到localStorage
+        localStorage.setItem('teacherProfiles', JSON.stringify(teacherProfiles));
+        
+        // 添加到待审核列表
+        const pendingReviews = JSON.parse(localStorage.getItem('pendingTeacherReviews') || '[]');
+        const existingIndex = pendingReviews.findIndex((item: any) => item.teacherId === userId);
+        
+        if (existingIndex === -1) {
+          pendingReviews.push({
+            teacherId: userId,
+            teacherName: formData.name,
+            subject: formData.subject,
+            submittedAt: new Date().toISOString()
+          });
+        }
+        
+        localStorage.setItem('pendingTeacherReviews', JSON.stringify(pendingReviews));
+        
+        setProfileStatus('submitted');
+        toast.success('资料已提交审核，管理员将在1-3个工作日内完成审核！');
+      } catch (error) {
+        console.error('提交审核失败:', error);
+        toast.error('提交审核失败，请重试');
       } finally {
         setSaving(false);
       }
@@ -364,11 +436,81 @@ const TeacherProfile = () => {
   
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">个人资料编辑</h2>
-        <p className="text-gray-500 mt-1">
-          完善您的个人资料，让家长更好地了解您的教学背景和专长
-        </p>
+      {/* 状态显示区域 */}
+      <div className="bg-white rounded-xl shadow-md p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">个人资料编辑</h2>
+            <p className="text-gray-500 mt-1">
+              完善您的个人资料，让家长更好地了解您的教学背景和专长
+            </p>
+          </div>
+          
+          {/* 资料状态 */}
+          <div className="flex items-center space-x-4">
+            <div className="text-right">
+              <div className="text-sm text-gray-500">资料状态</div>
+              <div className={cn(
+                "text-sm font-medium",
+                profileStatus === 'draft' && "text-gray-600",
+                profileStatus === 'submitted' && "text-blue-600",
+                profileStatus === 'approved' && "text-green-600",
+                profileStatus === 'rejected' && "text-red-600"
+              )}>
+                {profileStatus === 'draft' && '草稿状态'}
+                {profileStatus === 'submitted' && '审核中'}
+                {profileStatus === 'approved' && '已通过'}
+                {profileStatus === 'rejected' && '审核未通过'}
+              </div>
+            </div>
+            
+            <div className={cn(
+              "w-3 h-3 rounded-full",
+              profileStatus === 'draft' && "bg-gray-400",
+              profileStatus === 'submitted' && "bg-blue-500",
+              profileStatus === 'approved' && "bg-green-500",
+              profileStatus === 'rejected' && "bg-red-500"
+            )}></div>
+          </div>
+        </div>
+        
+        {/* 审核反馈 */}
+        {profileStatus === 'rejected' && adminFeedback && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">审核反馈</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{adminFeedback}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 通过状态提示 */}
+        {profileStatus === 'approved' && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">审核通过</h3>
+                <div className="mt-2 text-sm text-green-700">
+                  <p>恭喜！您的资料已通过审核，现在可以在家长端展示，接受教学任务了。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -690,27 +832,55 @@ const TeacherProfile = () => {
           </div>
         </div>
         
-        {/* 保存按钮 */}
-        <div className="flex justify-end">
+        {/* 操作按钮 */}
+        <div className="flex justify-end space-x-4">
+          {/* 保存草稿按钮 */}
+          <button
+            type="button"
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <div className="flex items-center">
+                <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                <span>保存中...</span>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <i class="fa-solid fa-save mr-2"></i>
+                <span>保存草稿</span>
+              </div>
+            )}
+          </button>
+          
+          {/* 提交审核按钮 */}
+          {profileStatus !== 'approved' && (
             <button
               type="button"
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
+              onClick={handleSubmitForReview}
+              disabled={saving || profileStatus === 'submitted'}
+              className="px-8 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
             >
               {saving ? (
                 <div className="flex items-center">
                   <i class="fa-solid fa-spinner fa-spin mr-2"></i>
-                  <span>保存中...</span>
+                  <span>提交中...</span>
+                </div>
+              ) : profileStatus === 'submitted' ? (
+                <div className="flex items-center">
+                  <i class="fa-solid fa-clock mr-2"></i>
+                  <span>审核中</span>
                 </div>
               ) : (
                 <div className="flex items-center">
-                  <i class="fa-solid fa-save mr-2"></i>
-                  <span>保存个人资料</span>
+                  <i class="fa-solid fa-paper-plane mr-2"></i>
+                  <span>提交审核</span>
                 </div>
               )}
             </button>
-          </div>
+          )}
+        </div>
         </div>
       </div>
     </div>
