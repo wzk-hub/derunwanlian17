@@ -135,7 +135,7 @@ export default function TeacherList() {
     // 年级筛选
     if (selectedGrades.length > 0) {
       result = result.filter(teacher => 
-        teacher.grade.some(g => selectedGrades.includes(g))
+        teacher.grades && teacher.grades.some(g => selectedGrades.includes(g))
       );
     }
     

@@ -1,0 +1,29 @@
+# 备用 Netlify 配置文件
+# 如果主配置失败，可以使用这个更保守的配置
+
+[build]
+  command = "npm install --legacy-peer-deps && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_CONFIG_LEGACY_PEER_DEPS = "true"
+
+# SPA redirect for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Basic security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

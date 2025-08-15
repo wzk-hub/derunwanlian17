@@ -96,7 +96,7 @@ const TeacherProfile = () => {
         introduction: profileData.introduction || '',
         experience: profileData.experience || '',
         subject: profileData.subject || '',
-        grade: profileData.grade || [],
+        grade: profileData.grades || [],
         price: profileData.price || 100,
         avatar: profileData.avatar || '',
         certificates: profileData.certificates || []
@@ -327,17 +327,38 @@ const TeacherProfile = () => {
         // 保存到localStorage
         localStorage.setItem('teacherProfiles', JSON.stringify(teacherProfiles));
         
-        // 更新用户姓名
+        // 更新用户信息
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const userIndex = users.findIndex((u: any) => u.id === userId);
         
         if (userIndex !== -1) {
-          users[userIndex].name = formData.name;
+          // 更新用户基本信息和教师专业信息
+          users[userIndex] = {
+            ...users[userIndex],
+            name: formData.name,
+            introduction: formData.introduction,
+            experience: formData.experience,
+            subject: formData.subject,
+            grades: formData.grade, // 保存年级到正确的属性
+            price: formData.price,
+            avatar: formData.avatar,
+            certificates: formData.certificates,
+            updatedAt: new Date()
+          };
           localStorage.setItem('users', JSON.stringify(users));
           
           // 更新当前用户信息
           const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-          currentUser.name = formData.name;
+          Object.assign(currentUser, {
+            name: formData.name,
+            introduction: formData.introduction,
+            experience: formData.experience,
+            subject: formData.subject,
+            grades: formData.grade,
+            price: formData.price,
+            avatar: formData.avatar,
+            certificates: formData.certificates
+          });
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
         

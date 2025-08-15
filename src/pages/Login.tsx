@@ -15,6 +15,22 @@ interface User {
   createdAt: Date;
 }
 
+// Simple hash function for demo purposes - in production use bcrypt or similar
+const simpleHash = (password: string): string => {
+  let hash = 0;
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36);
+};
+
+// Verify password against hash
+const verifyPassword = (password: string, hash: string): boolean => {
+  return simpleHash(password) === hash;
+};
+
 const Login = () => {
   const { setAuth } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -34,17 +50,26 @@ const Login = () => {
       const hasAdmin = users.some((user: User) => user.role === 'admin');
       
       if (!hasAdmin) {
-const adminUser: User = {
-  id: 'admin-1',
-  phone: 'derunwanlian888',
-  password: 'ljqwzk0103888',
-  role: 'admin',
-  name: '系统管理员',
-  createdAt: new Date()
-};
+        // Use environment variable or secure configuration in production
+        const adminPhone = process.env.REACT_APP_ADMIN_PHONE || 'admin@system.com';
+        const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD || 'SecureAdmin123!';
+        
+        const adminUser: User = {
+          id: 'admin-1',
+          phone: adminPhone,
+          password: simpleHash(adminPassword), // Hash the password
+          role: 'admin',
+          name: '系统管理员',
+          createdAt: new Date()
+        };
         
         users.push(adminUser);
         localStorage.setItem('users', JSON.stringify(users));
+        
+        // Log admin credentials only in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Admin account created:', { phone: adminPhone, password: adminPassword });
+        }
       }
     };
     
@@ -87,7 +112,7 @@ const adminUser: User = {
       
       if (isLogin) {
         // 登录逻辑
-        const user = users.find((u: User) => u.phone === phone && u.password === password);
+        const user = users.find((u: User) => u.phone === phone && verifyPassword(password, u.password));
         
         if (user) {
        setAuth(user.id, user.role, user.name);
@@ -120,7 +145,7 @@ const adminUser: User = {
          const newUser: User = {
            id: `${role}-${Date.now()}`,
            phone,
-           password,
+           password: simpleHash(password), // Hash the password
            role,
            createdAt: new Date(),
           verificationStatus: 'unverified', // 初始状态为未认证
