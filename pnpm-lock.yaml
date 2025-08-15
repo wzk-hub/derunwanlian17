@@ -52,7 +52,7 @@ importers:
         specifier: ^8.5.3
         version: 8.5.3
       rimraf:
-        specifier: ^5.0.7
+        specifier: ^5.0.10
         version: 5.0.10
       tailwindcss:
         specifier: ^3.4.17

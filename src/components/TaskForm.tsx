@@ -8,7 +8,7 @@ interface TaskFormProps {
   initialData?: Partial<CreateTaskRequest>;
   onSubmit: (data: CreateTaskRequest) => void;
   isSubmitting: boolean;
-  teachers: Array<{ id: string; name?: string }>;
+  teachers?: Array<{ id: string; name?: string }>;
 }
 
 // 科目选项
@@ -49,7 +49,9 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
     grade: initialData?.grade || '',
     duration: initialData?.duration || 10,
     price: initialData?.price || 0,
-    teacherId: initialData?.teacherId
+    teacherId: initialData?.teacherId,
+    studentName: initialData?.studentName || '',
+    studentSchool: initialData?.studentSchool || ''
   });
   
   // 表单验证状态
@@ -68,6 +70,8 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         grade: initialData.grade || prev.grade,
         duration: initialData.duration || prev.duration,
         price: initialData.price || prev.price,
+        studentName: initialData.studentName || prev.studentName,
+        studentSchool: initialData.studentSchool || prev.studentSchool,
       }));
     }
     
@@ -220,6 +224,44 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         </div>
       </div>
       
+      {/* 学生信息 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label htmlFor="studentName" className="block text-sm font-medium text-gray-700 mb-1">
+            学生姓名（可选）
+          </label>
+          <input
+            type="text"
+            id="studentName"
+            name="studentName"
+            value={formData.studentName || ''}
+            onChange={handleChange}
+            className={cn(
+              "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+              "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            )}
+            placeholder="请输入学生姓名"
+          />
+        </div>
+        <div>
+          <label htmlFor="studentSchool" className="block text-sm font-medium text-gray-700 mb-1">
+            学校（可选）
+          </label>
+          <input
+            type="text"
+            id="studentSchool"
+            name="studentSchool"
+            value={formData.studentSchool || ''}
+            onChange={handleChange}
+            className={cn(
+              "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+              "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            )}
+            placeholder="请输入学生所在学校"
+          />
+        </div>
+      </div>
+
       {/* 科目和年级 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 科目 */}
@@ -343,34 +385,31 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         </div>
          </div>
          
-         {/* 老师选择 */}
-         <div>
-           <label htmlFor="teacherId" className="block text-sm font-medium text-gray-700 mb-1">
-             选择老师 <span className="text-red-500">*</span>
-           </label>
-           <select
-             id="teacherId"
-             name="teacherId"
-             value={formData.teacherId}
-             onChange={handleChange}
-             className={cn(
-               "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
-               errors.teacherId 
-                 ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
-                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-             )}
-           >
-             <option value="">请选择老师</option>
-             {teachers.map(teacher => (
-               <option key={teacher.id} value={teacher.id}>
-                 {teacher.name || `老师${teacher.id}`}
-               </option>
-             ))}
-           </select>
-           {errors.teacherId && (
-             <p className="mt-1 text-sm text-red-600">{errors.teacherId}</p>
-           )}
-         </div>
+                   {/* 老师选择（可选） */}
+          {teachers && teachers.length > 0 && (
+            <div>
+              <label htmlFor="teacherId" className="block text-sm font-medium text-gray-700 mb-1">
+                选择老师（可选）
+              </label>
+              <select
+                id="teacherId"
+                name="teacherId"
+                value={formData.teacherId}
+                onChange={handleChange}
+                className={cn(
+                  "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+                  "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                )}
+              >
+                <option value="">请选择老师</option>
+                {teachers?.map(teacher => (
+                  <option key={teacher.id} value={teacher.id}>
+                    {teacher.name || `老师${teacher.id}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
          
          {/* 提交按钮 */}
          <div className="pt-4">
