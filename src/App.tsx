@@ -5,10 +5,12 @@ import ParentDashboard from "@/pages/ParentDashboard";
 import TeacherDashboard from "@/pages/TeacherDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
+import AdminTasks from "@/pages/admin/Tasks";
 import TeacherList from "@/pages/parent/TeacherList";
 import TaskPublish from "@/pages/parent/TaskPublish";
 import Payment from "@/pages/parent/Payment";
 import ParentMessages from "@/pages/parent/Messages";
+import ParentTasks from "@/pages/parent/Tasks";
 import ParentVerification from "@/pages/parent/Verification";
 import TeacherMessages from "@/pages/teacher/Messages";
 import TeacherProfile from "@/pages/teacher/Profile";
@@ -117,7 +119,7 @@ export default function App() {
                 </ProtectedRoute>
               }>
                  <Route path="teachers" element={<TeacherList />} />
-                 <Route path="tasks" element={<div>我的任务列表</div>} />
+                 <Route path="tasks" element={<ParentTasks />} />
                 <Route path="tasks/new" element={<TaskPublish />} />
                 <Route path="payment/:taskId" element={<Payment />} />
                 <Route path="messages" element={<ParentMessages />} />
@@ -138,7 +140,11 @@ export default function App() {
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
               </ProtectedRoute>
-            } />
+            }>
+              <Route path="tasks" element={<AdminTasks />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route index element={<Navigate to="/admin/tasks" replace />} />
+            </Route>
             <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
           </Routes>
         </main>
