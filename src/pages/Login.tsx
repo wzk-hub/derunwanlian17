@@ -62,7 +62,7 @@ const adminUser: User = {
       return;
     }
     
-    if (!/^1[3-9]\d{9}$/.test(phone)) {
+    if (!isLogin && !/^1[3-9]\d{9}$/.test(phone)) {
       setError('请输入有效的手机号');
       return;
     }
@@ -86,8 +86,8 @@ const adminUser: User = {
       const users = JSON.parse(localStorage.getItem('users') || '[]');
       
       if (isLogin) {
-        // 登录逻辑
-        const user = users.find((u: User) => u.phone === phone && u.password === password);
+        // 登录逻辑（管理员支持账号/手机号登录）
+        const user = users.find((u: any) => (u.phone === phone || u.id === phone || (u.role === 'admin' && u.phone === phone)) && u.password === password);
         
         if (user) {
        setAuth(user.id, user.role, user.name);
