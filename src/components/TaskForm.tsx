@@ -47,6 +47,8 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
     description: initialData?.description || '',
     subject: initialData?.subject || '',
     grade: initialData?.grade || '',
+    school: initialData?.school || '',
+    studentProfile: initialData?.studentProfile || '',
     duration: initialData?.duration || 10,
     price: initialData?.price || 0,
     teacherId: initialData?.teacherId
@@ -66,6 +68,8 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         description: initialData.description || prev.description,
         subject: initialData.subject || prev.subject,
         grade: initialData.grade || prev.grade,
+        school: initialData.school || prev.school,
+        studentProfile: initialData.studentProfile || prev.studentProfile,
         duration: initialData.duration || prev.duration,
         price: initialData.price || prev.price,
       }));
@@ -281,6 +285,57 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         </div>
       </div>
       
+      {/* 学校信息 */}
+      <div>
+        <label htmlFor="school" className="block text-sm font-medium text-gray-700 mb-1">
+          学生所在学校
+        </label>
+        <input
+          type="text"
+          id="school"
+          name="school"
+          value={formData.school}
+          onChange={handleChange}
+          className={cn(
+            "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+            errors.school 
+              ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+          )}
+          placeholder="请输入学生所在的学校名称"
+        />
+        {errors.school && (
+          <p className="mt-1 text-sm text-red-600">{errors.school}</p>
+        )}
+      </div>
+      
+      {/* 学生简介 */}
+      <div>
+        <label htmlFor="studentProfile" className="block text-sm font-medium text-gray-700 mb-1">
+          学生简介
+        </label>
+        <textarea
+          id="studentProfile"
+          name="studentProfile"
+          value={formData.studentProfile}
+          onChange={handleChange}
+          rows={4}
+          className={cn(
+            "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-offset-2 transition-all",
+            errors.studentProfile 
+              ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
+              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+          )}
+          placeholder="请简要介绍您的孩子，包括学习特点、兴趣爱好、辅导需求等，帮助老师更好地了解学生..."
+        />
+        <div className="flex justify-between items-center">
+          {errors.studentProfile && (
+            <p className="mt-1 text-sm text-red-600">{errors.studentProfile}</p>
+          )}
+          <p className="mt-1 text-sm text-gray-500">{formData.studentProfile.length}/300字</p>
+        </div>
+      </div>
+      
       {/* 课时和价格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 课时数量 */}
@@ -315,7 +370,7 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
           </label>
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-              <i class="fa-solid fa-yen-sign"></i>
+              <i className="fa-solid fa-yen-sign"></i>
             </span>
             <input
               type="number"
@@ -381,12 +436,12 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center">
-              <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+              <i className="fa-solid fa-spinner fa-spin mr-2"></i>
               <span>提交中...</span>
             </div>
           ) : (
             <div className="flex items-center justify-center">
-              <i class="fa-solid fa-paper-plane mr-2"></i>
+              <i className="fa-solid fa-paper-plane mr-2"></i>
               <span>发布教学任务</span>
             </div>
           )}

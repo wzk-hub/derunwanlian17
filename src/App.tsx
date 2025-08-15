@@ -7,6 +7,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import TeacherList from "@/pages/parent/TeacherList";
 import TaskPublish from "@/pages/parent/TaskPublish";
+import Tasks from "@/pages/parent/Tasks";
 import Payment from "@/pages/parent/Payment";
 import ParentMessages from "@/pages/parent/Messages";
 import ParentVerification from "@/pages/parent/Verification";
@@ -117,7 +118,7 @@ export default function App() {
                 </ProtectedRoute>
               }>
                  <Route path="teachers" element={<TeacherList />} />
-                 <Route path="tasks" element={<div>我的任务列表</div>} />
+                 <Route path="tasks" element={<Tasks />} />
                 <Route path="tasks/new" element={<TaskPublish />} />
                 <Route path="payment/:taskId" element={<Payment />} />
                 <Route path="messages" element={<ParentMessages />} />

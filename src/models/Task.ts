@@ -12,6 +12,8 @@ export interface Task {
   description: string;
   subject: string;
   grade: string;
+  school?: string; // 学生所在学校
+  studentProfile?: string; // 学生简介
   duration: number; // 课时数量
   price: number; // 总价格
   status: TaskStatus;
@@ -42,6 +44,8 @@ export interface CreateTaskRequest {
   description: string;
   subject: string;
   grade: string;
+  school?: string; // 学生所在学校
+  studentProfile?: string; // 学生简介
   duration: number;
   price: number;
   teacherId: string; // 选择老师后必填
