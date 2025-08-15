@@ -32,7 +32,7 @@ export interface User {
   
   // 老师特有信息
   subjects?: string[]; // 教学科目，支持多个
-  grade?: string[]; // 教授年级
+  grades?: string[]; // 教授年级 (renamed from grade to avoid confusion)
   introduction?: string; // 个人简介
   experience?: string; // 教学经验
   price?: number; // 课时费用

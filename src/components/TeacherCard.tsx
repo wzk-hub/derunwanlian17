@@ -9,7 +9,7 @@ interface Teacher {
   name: string;
   avatar?: string;
   subject: string;
-  grade: string[];
+  grades: string[];
   introduction: string;
   experience: string;
   rating: number;
@@ -75,7 +75,7 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
            </div>
             
             <div className="mt-1 flex flex-wrap gap-2">
-              {teacher.grade.map((grade) => (
+              {teacher.grades && teacher.grades.map((grade) => (
                 <span key={grade} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
                   {getGradeName(grade)}
                 </span>

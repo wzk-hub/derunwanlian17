@@ -96,12 +96,12 @@ const ParentDashboard = () => {
             </button>
              <button
               onClick={() => {
-                setActiveTab('profile');
-                navigate('/parent/profile');
+                setActiveTab('messages');
+                navigate('/parent/messages');
               }}
               className={cn(
                 "flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap",
-                activeTab === 'profile' 
+                activeTab === 'messages' 
                   ? "bg-blue-600 text-white" 
                   : "text-gray-600 hover:bg-gray-100"
               )}

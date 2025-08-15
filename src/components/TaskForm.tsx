@@ -161,6 +161,10 @@ export default function TaskForm({ initialData, onSubmit, isSubmitting, teachers
       newErrors.price = '请输入有效的价格';
     }
     
+    if (!formData.teacherId) {
+      newErrors.teacherId = '请选择一位老师';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

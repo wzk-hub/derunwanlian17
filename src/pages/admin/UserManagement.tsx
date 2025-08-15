@@ -242,7 +242,7 @@ export default function UserManagement() {
                       {user.role === 'teacher' && (
                         <div className="mt-1 text-sm text-gray-500 space-y-1">
                           <div>科目: {getTeacherSubjects(user.subjects)}</div>
-                          <div>年级: {getTeacherGrades(user.grade)}</div>
+                          <div>年级: {getTeacherGrades(user.grades)}</div>
                           {user.price && (
                             <div>价格: ¥{user.price}/小时</div>
                           )}
@@ -307,7 +307,7 @@ export default function UserManagement() {
                                     </div>
                                     <div class="flex justify-between">
                                       <span class="text-gray-500">教授年级:</span>
-                                      <span>${getTeacherGrades(user.grade)}</span>
+                                      <span>${getTeacherGrades(user.grades)}</span>
                                     </div>
                                     <div class="flex justify-between">
                                       <span class="text-gray-500">课时费用:</span>
@@ -332,15 +332,14 @@ export default function UserManagement() {
                           toast.custom((t) => (
                             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
                               <div dangerouslySetInnerHTML={{ __html: detailsHTML }} />
+                              <button 
+                                onClick={() => toast.dismiss(t)}
+                                className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                              >
+                                关闭
+                              </button>
                             </div>
                           ), { duration: Infinity });
-                          
-                          // 添加关闭按钮事件监听
-                          setTimeout(() => {
-                            document.querySelector('.close-btn')?.addEventListener('click', () => {
-                              toast.dismiss();
-                            });
-                          }, 0);
                         }}
                         className="text-blue-600 hover:text-blue-900 mr-4"
                       >

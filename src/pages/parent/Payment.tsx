@@ -56,10 +56,31 @@ const Payment = () => {
   
   // 处理支付完成确认
   const handlePaymentConfirm = () => {
-    if (!taskId) return;
+    if (!taskId || !userId) {
+      toast.error('用户身份验证失败');
+      return;
+    }
+    
+    // 再次验证任务归属权和状态
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const targetTask = tasks.find((t: any) => t.id === taskId);
+    
+    if (!targetTask) {
+      toast.error('任务不存在');
+      return;
+    }
+    
+    if (targetTask.publisherId !== userId) {
+      toast.error('无权限操作此任务');
+      return;
+    }
+    
+    if (targetTask.status !== 'approved') {
+      toast.error('任务状态不正确，无法支付');
+      return;
+    }
     
     // 更新任务支付状态
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
     const updatedTasks = tasks.map((t: any) => {
       if (t.id === taskId) {
           return {
@@ -68,7 +89,8 @@ const Payment = () => {
             paymentMethod,
             paidAt: new Date(),
             updatedAt: new Date(),
-            paymentTransactionId: `TRX-${Date.now()}`
+            paymentTransactionId: `TRX-${Date.now()}`,
+            paidById: userId // 记录支付用户ID
           };
       }
       return t;
@@ -77,7 +99,7 @@ const Payment = () => {
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     setPaymentCompleted(true);
     
-    toast.success('支付确认成功！');
+    toast.success('支付确认成功！等待管理员确认');
     
     // 2秒后返回任务列表
     setTimeout(() => {
