@@ -349,6 +349,9 @@ const adminUser: User = {
                
 
             </form>
+            <div className="mt-4 text-center">
+              <a href="/forgot" className="text-blue-600 hover:underline text-sm">忘记密码？点此找回</a>
+            </div>
           </div>
         </div>
         
