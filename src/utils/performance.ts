@@ -1,3 +1,7 @@
+/**
+ * 性能优化工具函数
+ */
+
 // 防抖函数
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -37,145 +41,8 @@ export function throttle<T extends (...args: any[]) => any>(
   };
 }
 
-// 图片压缩
-export function compressImage(
-  file: File,
-  options: {
-    maxWidth?: number;
-    maxHeight?: number;
-    quality?: number;
-    format?: 'jpeg' | 'png' | 'webp';
-  } = {}
-): Promise<Blob> {
-  const {
-    maxWidth = 1920,
-    maxHeight = 1080,
-    quality = 0.8,
-    format = 'jpeg'
-  } = options;
-
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-
-    img.onload = () => {
-      // 计算新的尺寸
-      let { width, height } = img;
-      
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
-      }
-      
-      if (height > maxHeight) {
-        width = (width * maxHeight) / height;
-        height = maxHeight;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // 绘制图片
-      ctx?.drawImage(img, 0, 0, width, height);
-
-      // 转换为blob
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to compress image'));
-          }
-        },
-        `image/${format}`,
-        quality
-      );
-    };
-
-    img.onerror = () => reject(new Error('Failed to load image'));
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-// 批量图片压缩
-export async function compressImages(
-  files: File[],
-  options: {
-    maxWidth?: number;
-    maxHeight?: number;
-    quality?: number;
-    format?: 'jpeg' | 'png' | 'webp';
-    maxConcurrent?: number;
-  } = {}
-): Promise<Blob[]> {
-  const { maxConcurrent = 3, ...compressOptions } = options;
-  const results: Blob[] = [];
-  
-  // 分批处理
-  for (let i = 0; i < files.length; i += maxConcurrent) {
-    const batch = files.slice(i, i + maxConcurrent);
-    const batchPromises = batch.map(file => compressImage(file, compressOptions));
-    
-    const batchResults = await Promise.all(batchPromises);
-    results.push(...batchResults);
-  }
-  
-  return results;
-}
-
-// 文件大小格式化
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-// 图片预加载
-export function preloadImage(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
-    img.src = src;
-  });
-}
-
-// 批量图片预加载
-export function preloadImages(sources: string[]): Promise<void[]> {
-  return Promise.all(sources.map(src => preloadImage(src)));
-}
-
-// 延迟执行
-export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// 批量延迟执行
-export async function batchDelay<T>(
-  items: T[],
-  processor: (item: T) => Promise<void>,
-  delayMs: number = 100,
-  batchSize: number = 5
-): Promise<void> {
-  for (let i = 0; i < items.length; i += batchSize) {
-    const batch = items.slice(i, i + batchSize);
-    const promises = batch.map(processor);
-    
-    await Promise.all(promises);
-    
-    if (i + batchSize < items.length) {
-      await delay(delayMs);
-    }
-  }
-}
-
-// 内存使用监控
-export function getMemoryUsage(): { used: number; total: number; percentage: number } | null {
+// 获取内存使用情况
+export function getMemoryUsage() {
   if ('memory' in performance) {
     const memory = (performance as any).memory;
     return {
@@ -187,119 +54,228 @@ export function getMemoryUsage(): { used: number; total: number; percentage: num
   return null;
 }
 
-// 性能标记
+// 创建性能标记
 export function createPerformanceMarker(name: string) {
   const start = performance.now();
-  
   return {
     end: () => {
       const duration = performance.now() - start;
-      console.log(`Performance: ${name} took ${duration.toFixed(2)}ms`);
+      if (performance.mark) {
+        performance.mark(`${name}-end`);
+        performance.measure(name, `${name}-start`, `${name}-end`);
+      }
       return duration;
     }
   };
 }
 
-// 批量性能标记
-export function createBatchPerformanceMarker(name: string) {
-  const markers = new Map<string, number>();
-  
-  return {
-    start: (key: string) => {
-      markers.set(key, performance.now());
-    },
-    end: (key: string) => {
-      const start = markers.get(key);
-      if (start) {
-        const duration = performance.now() - start;
-        console.log(`Performance: ${name} - ${key} took ${duration.toFixed(2)}ms`);
-        markers.delete(key);
-        return duration;
-      }
-      return 0;
-    },
-    endAll: () => {
-      const results: Record<string, number> = {};
-      markers.forEach((start, key) => {
-        const duration = performance.now() - start;
-        results[key] = duration;
-        console.log(`Performance: ${name} - ${key} took ${duration.toFixed(2)}ms`);
+// 图片懒加载
+export function lazyLoadImage(img: HTMLImageElement, src: string) {
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          img.src = src;
+          observer.unobserve(img);
+        }
       });
-      markers.clear();
-      return results;
-    }
-  };
+    });
+    observer.observe(img);
+  } else {
+    // 降级处理
+    img.src = src;
+  }
 }
 
 // 虚拟滚动优化
-export function calculateVirtualScrollRange(
-  scrollTop: number,
-  containerHeight: number,
+export function createVirtualScroller<T>(
+  items: T[],
   itemHeight: number,
-  totalItems: number,
-  overscan: number = 5
+  containerHeight: number,
+  overscan = 5
 ) {
-  const start = Math.floor(scrollTop / itemHeight);
+  const totalHeight = items.length * itemHeight;
   const visibleCount = Math.ceil(containerHeight / itemHeight);
-  const end = Math.min(start + visibleCount + overscan, totalItems);
-  const startIndex = Math.max(0, start - overscan);
   
   return {
-    start: startIndex,
-    end,
-    offsetY: startIndex * itemHeight
+    getVisibleRange: (scrollTop: number) => {
+      const startIndex = Math.floor(scrollTop / itemHeight);
+      const endIndex = Math.min(
+        startIndex + visibleCount + overscan,
+        items.length
+      );
+      
+      return {
+        startIndex: Math.max(0, startIndex - overscan),
+        endIndex,
+        offsetY: startIndex * itemHeight
+      };
+    },
+    totalHeight
   };
 }
 
-// 图片懒加载优化
-export function createIntersectionObserver(
-  callback: IntersectionObserverCallback,
-  options: IntersectionObserverInit = {}
-): IntersectionObserver {
-  const defaultOptions: IntersectionObserverInit = {
-    root: null,
-    rootMargin: '50px',
-    threshold: 0.1,
-    ...options
-  };
+// 批量DOM更新优化
+export function batchDOMUpdates(updates: (() => void)[]) {
+  if (updates.length === 0) return;
   
-  return new IntersectionObserver(callback, defaultOptions);
+  // 使用 requestAnimationFrame 批量更新
+  requestAnimationFrame(() => {
+    updates.forEach(update => update());
+  });
 }
 
-// 缓存管理
-export class SimpleCache<K, V> {
-  private cache = new Map<K, V>();
-  private maxSize: number;
+// 防抖搜索
+export function createDebouncedSearch<T>(
+  searchFn: (query: string) => Promise<T[]>,
+  delay: number = 300
+) {
+  let abortController: AbortController | null = null;
   
-  constructor(maxSize: number = 100) {
-    this.maxSize = maxSize;
-  }
-  
-  get(key: K): V | undefined {
-    return this.cache.get(key);
-  }
-  
-  set(key: K, value: V): void {
-    if (this.cache.size >= this.maxSize) {
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+  return async (query: string): Promise<T[]> => {
+    // 取消之前的请求
+    if (abortController) {
+      abortController.abort();
     }
-    this.cache.set(key, value);
+    
+    // 创建新的 AbortController
+    abortController = new AbortController();
+    
+    try {
+      const result = await searchFn(query);
+      return result;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        // 请求被取消，返回空数组
+        return [];
+      }
+      throw error;
+    }
+  };
+}
+
+// 缓存函数结果
+export function memoize<T extends (...args: any[]) => any>(
+  func: T,
+  resolver?: (...args: Parameters<T>) => string
+): T {
+  const cache = new Map<string, ReturnType<T>>();
+  
+  return ((...args: Parameters<T>) => {
+    const key = resolver ? resolver(...args) : JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    
+    const result = func(...args);
+    cache.set(key, result);
+    return result;
+  }) as T;
+}
+
+// 预加载资源
+export function preloadResource(url: string, type: 'image' | 'script' | 'style' = 'image') {
+  return new Promise((resolve, reject) => {
+    if (type === 'image') {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    } else if (type === 'script') {
+      const script = document.createElement('script');
+      script.onload = () => resolve(script);
+      script.onerror = reject;
+      script.src = url;
+      document.head.appendChild(script);
+    } else if (type === 'style') {
+      const link = document.createElement('link');
+      link.onload = () => resolve(link);
+      link.onerror = reject;
+      link.rel = 'stylesheet';
+      link.href = url;
+      document.head.appendChild(link);
+    }
+  });
+}
+
+// 性能监控
+export class PerformanceMonitor {
+  private metrics: Map<string, number[]> = new Map();
+  private observers: Map<string, PerformanceObserver> = new Map();
+  
+  constructor() {
+    this.initObservers();
   }
   
-  has(key: K): boolean {
-    return this.cache.has(key);
+  private initObservers() {
+    // 监控长任务
+    if ('PerformanceObserver' in window) {
+      try {
+        const longTaskObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach((entry) => {
+            if (entry.duration > 50) {
+              console.warn('检测到长任务:', entry);
+            }
+          });
+        });
+        longTaskObserver.observe({ entryTypes: ['longtask'] });
+        this.observers.set('longtask', longTaskObserver);
+      } catch (e) {
+        console.warn('长任务监控不可用:', e);
+      }
+      
+      // 监控布局偏移
+      try {
+        const layoutShiftObserver = new PerformanceObserver((list) => {
+          list.getEntries().forEach((entry: any) => {
+            if (entry.value > 0.1) {
+              console.warn('检测到布局偏移:', entry);
+            }
+          });
+        });
+        layoutShiftObserver.observe({ entryTypes: ['layout-shift'] });
+        this.observers.set('layout-shift', layoutShiftObserver);
+      } catch (e) {
+        console.warn('布局偏移监控不可用:', e);
+      }
+    }
   }
   
-  delete(key: K): boolean {
-    return this.cache.delete(key);
+  // 记录性能指标
+  recordMetric(name: string, value: number) {
+    if (!this.metrics.has(name)) {
+      this.metrics.set(name, []);
+    }
+    this.metrics.get(name)!.push(value);
+    
+    // 只保留最近100个值
+    if (this.metrics.get(name)!.length > 100) {
+      this.metrics.get(name)!.shift();
+    }
   }
   
-  clear(): void {
-    this.cache.clear();
+  // 获取性能指标
+  getMetric(name: string) {
+    const values = this.metrics.get(name) || [];
+    if (values.length === 0) return null;
+    
+    const sorted = [...values].sort((a, b) => a - b);
+    return {
+      min: sorted[0],
+      max: sorted[sorted.length - 1],
+      avg: values.reduce((a, b) => a + b, 0) / values.length,
+      p95: sorted[Math.floor(sorted.length * 0.95)]
+    };
   }
   
-  size(): number {
-    return this.cache.size;
+  // 清理
+  destroy() {
+    this.observers.forEach(observer => observer.disconnect());
+    this.observers.clear();
+    this.metrics.clear();
   }
 }
+
+// 导出单例实例
+export const performanceMonitor = new PerformanceMonitor();

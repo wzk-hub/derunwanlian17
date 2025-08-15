@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Skeleton } from './Skeleton';
+import { lazyLoadImage } from '@/utils/performance';
 
 interface LazyImageProps {
   src: string;
@@ -36,12 +37,12 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // 默认占位符
-  const defaultPlaceholder = (
+  const defaultPlaceholder = useMemo(() => (
     <Skeleton 
       className={`${className} ${width ? `w-${width}` : 'w-full'} ${height ? `h-${height}` : 'h-32'}`}
       animate={true}
     />
-  );
+  ), [className, width, height]);
 
   // 处理图片加载
   const handleImageLoad = useCallback(() => {
@@ -60,20 +61,20 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   useEffect(() => {
     if (!imgRef.current) return;
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-            observerRef.current?.disconnect();
-          }
-        });
-      },
-      {
-        threshold,
-        rootMargin
-      }
-    );
+    // 使用优化的懒加载函数
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observerRef.current?.disconnect();
+        }
+      });
+    };
+
+    observerRef.current = new IntersectionObserver(handleIntersection, {
+      threshold,
+      rootMargin
+    });
 
     observerRef.current.observe(imgRef.current);
 

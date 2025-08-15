@@ -14,6 +14,9 @@ const TeacherDashboard = lazy(() => import("@/pages/TeacherDashboard"));
 const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const UserManagement = lazy(() => import("@/pages/admin/UserManagement"));
 const AdminTasks = lazy(() => import("@/pages/admin/Tasks"));
+const AdminTaskPublish = lazy(() => import("@/pages/admin/TaskPublish"));
+const AdminCustomerService = lazy(() => import("@/pages/admin/CustomerService"));
+const AdminTeacherManagement = lazy(() => import("@/pages/admin/TeacherManagement"));
 const AdminSettlements = lazy(() => import("@/pages/admin/Settlements"));
 const AdminSettings = lazy(() => import("@/pages/admin/Settings"));
 const TeacherList = lazy(() => import("@/pages/parent/TeacherList"));
@@ -185,6 +188,9 @@ export default function App() {
                 </ProtectedRoute>
               }>
                 <Route path="tasks" element={<AdminTasks />} />
+                <Route path="task-publish" element={<AdminTaskPublish />} />
+                <Route path="customer-service" element={<AdminCustomerService />} />
+                <Route path="teachers" element={<AdminTeacherManagement />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="settlements" element={<AdminSettlements />} />
                 <Route path="settings" element={<AdminSettings />} />

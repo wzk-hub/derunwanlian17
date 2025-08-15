@@ -1,0 +1,298 @@
+/* 性能优化CSS样式 */
+
+/* 硬件加速 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 平滑滚动优化 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 图片优化 */
+.image-optimized {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+/* 字体优化 */
+.font-optimized {
+  font-display: swap;
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* 动画性能优化 */
+.animate-optimized {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* 滚动条优化 */
+.scrollbar-optimized::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-optimized::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.scrollbar-optimized::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-optimized::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 加载状态优化 */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 渐进式加载动画 */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 骨架屏动画 */
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 虚拟滚动容器 */
+.virtual-scroll-container {
+  position: relative;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.virtual-scroll-content {
+  position: relative;
+  will-change: transform;
+}
+
+/* 图片懒加载占位符 */
+.lazy-image-placeholder {
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* 搜索框优化 */
+.search-input-optimized {
+  transition: all 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.search-input-optimized:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 按钮点击优化 */
+.button-optimized {
+  transition: all 0.15s ease;
+  will-change: transform;
+}
+
+.button-optimized:active {
+  transform: scale(0.98);
+}
+
+/* 卡片悬停优化 */
+.card-hover-optimized {
+  transition: all 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-hover-optimized:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 列表项优化 */
+.list-item-optimized {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* 模态框优化 */
+.modal-optimized {
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+/* 工具提示优化 */
+.tooltip-optimized {
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+
+/* 响应式图片容器 */
+.responsive-image-container {
+  position: relative;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.responsive-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+/* 加载状态指示器 */
+.loading-indicator {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f4f6;
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态样式 */
+.error-state {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+/* 空状态样式 */
+.empty-state {
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  color: #6b7280;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+/* 性能监控面板样式 */
+.performance-monitor {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  backdrop-filter: blur(10px);
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  .mobile-scroll-optimized {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .mobile-scroll-item {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+}
+
+/* 打印样式优化 */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-optimized {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border-width: 2px;
+    background: white;
+    color: black;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-optimized,
+  .fade-in,
+  .loading-skeleton,
+  .skeleton-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .card-hover-optimized:hover {
+    transform: none !important;
+  }
+  
+  .button-optimized:active {
+    transform: none !important;
+  }
+}

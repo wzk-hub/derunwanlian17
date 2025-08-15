@@ -13,9 +13,12 @@ interface Teacher {
   grade: string[];
   introduction: string;
   experience: string;
-  rating: number;
+  averageRating?: number;
+  totalRatings?: number;
   price: number;
   studentsCount: number;
+  isPinned?: boolean;
+  pinnedOrder?: number;
 }
 
 // 老师卡片组件
@@ -41,7 +44,17 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
   };
   
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1">
+    <div className={`bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 ${
+      teacher.isPinned ? 'border-2 border-blue-300 bg-blue-50' : ''
+    }`}>
+      {/* 置顶标识 */}
+      {teacher.isPinned && (
+        <div className="bg-blue-600 text-white px-3 py-1 text-sm font-medium text-center">
+          <i className="fa-solid fa-thumbtack mr-1"></i>
+          置顶推荐
+        </div>
+      )}
+      
       {/* 老师基本信息 */}
       <div className="p-6">
         <div className="flex items-start">
@@ -54,9 +67,11 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
               className="border-4 border-blue-100"
             />
             {/* 评分 */}
-            <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
-              {teacher.rating}
-            </div>
+            {teacher.averageRating && (
+              <div className="absolute -bottom-1 -right-1 bg-yellow-400 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
+                {Math.round(teacher.averageRating / 20)}
+              </div>
+            )}
           </div>
           
           {/* 基本信息 */}
@@ -88,8 +103,15 @@ export default function TeacherCard({ teacher, onContact, onSelectAndPay }: Teac
               <i className="fa-solid fa-user-graduate mr-1"></i>
               <span>{teacher.studentsCount}名学生</span>
               <span className="mx-2">•</span>
-                 <i class="fa-solid fa-yen-sign mr-1"></i>
+              <i className="fa-solid fa-yen-sign mr-1"></i>
               <span>{calculateDisplayPrice(teacher.price)}元/小时</span>
+              {teacher.averageRating && (
+                <>
+                  <span className="mx-2">•</span>
+                  <i className="fa-solid fa-star mr-1 text-yellow-500"></i>
+                  <span>{teacher.averageRating}分 ({teacher.totalRatings}人评价)</span>
+                </>
+              )}
             </div>
           </div>
         </div>

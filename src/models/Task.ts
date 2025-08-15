@@ -44,6 +44,19 @@ export interface Task {
   // 新增：软删除
   deletedAt?: Date;
   isDeleted?: boolean;
+  // 新增：置顶相关
+  isPinned?: boolean; // 是否置顶
+  pinnedAt?: Date; // 置顶时间
+  pinnedById?: string; // 置顶管理员ID
+  pinnedOrder?: number; // 置顶排序（数字越小越靠前）
+  // 新增：任务来源
+  source: 'parent' | 'admin'; // 任务来源：家长发布或管理员发布
+  // 新增：任务评分
+  rating?: number; // 任务完成后的评分（1-100分）
+  ratingComment?: string; // 评分评价
+  ratedAt?: Date; // 评分时间
+  // 新增：任务标签
+  tags?: string[]; // 任务标签，如"紧急"、"推荐"等
 }
 
 /**
@@ -61,4 +74,14 @@ export interface CreateTaskRequest {
   studentSchool: string;
   // 老师在发布时可选
   teacherId?: string; // 选择老师后可填
+  // 新增：任务标签
+  tags?: string[];
+}
+
+/**
+ * 管理员发布任务请求接口
+ */
+export interface AdminCreateTaskRequest extends CreateTaskRequest {
+  isPinned?: boolean;
+  pinnedOrder?: number;
 }

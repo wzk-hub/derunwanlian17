@@ -18,9 +18,12 @@ interface Teacher {
   grade: string[];
   introduction: string;
   experience: string;
-  rating: number;
+  averageRating?: number;
+  totalRatings?: number;
   price: number;
   studentsCount: number;
+  isPinned?: boolean;
+  pinnedOrder?: number;
 }
 
 // 模拟老师数据
@@ -32,9 +35,12 @@ const mockTeachers: Teacher[] = [
     grade: ['1', '2', '3', '4', '5', '6'],
     introduction: '资深小学数学教师，10年教学经验，擅长启发式教学，让孩子爱上数学，培养逻辑思维能力。曾获市级优秀教师称号，所教学生成绩提升显著。',
     experience: '10年小学数学教学经验，曾任重点小学数学教研组组长，熟悉小学各年级数学知识点和教学大纲，擅长针对不同类型学生制定个性化教学方案。',
-    rating: 5,
+    averageRating: 95,
+    totalRatings: 45,
     price: 120,
-    studentsCount: 156
+    studentsCount: 156,
+    isPinned: true,
+    pinnedOrder: 1
   },
   {
     id: 'teacher-2',
@@ -43,9 +49,12 @@ const mockTeachers: Teacher[] = [
     grade: ['7', '8', '9', '10', '11', '12'],
     introduction: '英语专业八级，8年初高中英语教学经验，擅长语法教学和阅读理解训练，帮助多名学生提高英语成绩，顺利考入理想大学。',
     experience: '英语专业八级，8年初高中英语教学经验，曾在知名培训机构担任英语教研组组长，熟悉中高考英语考点和命题规律，教学方法灵活多样。',
-    rating: 4,
+    averageRating: 88,
+    totalRatings: 32,
     price: 150,
-    studentsCount: 128
+    studentsCount: 128,
+    isPinned: true,
+    pinnedOrder: 2
   },
   {
     id: 'teacher-3',
@@ -54,7 +63,8 @@ const mockTeachers: Teacher[] = [
     grade: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
     introduction: '小学语文高级教师，15年教学经验，注重阅读与写作能力培养，善于激发学生学习兴趣，让孩子轻松学好语文。',
     experience: '小学语文高级教师，15年教学经验，曾获省级优秀教师称号，出版多本语文教学辅导书籍，擅长文言文和现代文阅读理解教学。',
-    rating: 5,
+    averageRating: 92,
+    totalRatings: 67,
     price: 130,
     studentsCount: 210
   },
@@ -65,7 +75,8 @@ const mockTeachers: Teacher[] = [
     grade: ['10', '11', '12'],
     introduction: '物理学科带头人，重点大学物理系毕业，12年高中物理教学经验，擅长将抽象物理概念转化为生动实例，帮助学生理解。',
     experience: '重点大学物理系毕业，12年高中物理教学经验，培养多名学生在物理竞赛中获奖，对高考物理有深入研究，教学风格严谨而不失风趣。',
-    rating: 4,
+    averageRating: 85,
+    totalRatings: 28,
     price: 180,
     studentsCount: 95
   },
@@ -76,7 +87,8 @@ const mockTeachers: Teacher[] = [
   grade: ['10', '11', '12'],
     introduction: '化学高级教师，10年高中化学教学经验，精通化学实验教学，让学生在实践中掌握化学知识，提高学习兴趣和成绩。',
     experience: '化学高级教师，10年高中化学教学经验，曾任重点高中化学备课组组长，熟悉高考化学考点和命题趋势，善于将复杂化学知识系统化、简单化。',
-    rating: 5,
+    averageRating: 90,
+    totalRatings: 41,
     price: 170,
     studentsCount: 87
   },
@@ -87,7 +99,8 @@ const mockTeachers: Teacher[] = [
     grade: ['1', '2', '3', '4', '5', '6'],
     introduction: '少儿英语专家，擅长幼儿及小学低年级英语启蒙，采用情景教学法，让孩子在轻松愉快的氛围中学习英语，培养语感和兴趣。',
     experience: '英语教育专业毕业，8年少儿英语教学经验，持有TESOL国际英语教师资格证书，曾在国际幼儿园担任英语教师，擅长通过游戏、歌曲等方式进行英语教学。',
-    rating: 4,
+    averageRating: 87,
+    totalRatings: 56,
     price: 140,
     studentsCount: 143
   }
