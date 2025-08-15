@@ -121,7 +121,7 @@ export default function UserManagement() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="w-full md:w-64 relative">
           <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-            <i class="fa-solid fa-search"></i>
+            <i className="fa-solid fa-search"></i>
           </span>
           <input
             type="text"

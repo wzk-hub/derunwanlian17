@@ -4,6 +4,7 @@ import TeacherCard from '@/components/TeacherCard';
 import GradeFilter from '@/components/GradeFilter';
 import { AuthContext } from '@/contexts/authContext';
 import { toast } from 'sonner';
+import useDebounce from '@/hooks/useDebounce';
 
 // 老师信息接口定义
 interface Teacher {
@@ -96,6 +97,7 @@ export default function TeacherList() {
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedTerm = useDebounce(searchTerm, 300);
   const [loading, setLoading] = useState(true);
   
   // 获取用户信息和孩子年级
@@ -140,8 +142,8 @@ export default function TeacherList() {
     }
     
     // 搜索筛选
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (debouncedTerm) {
+      const term = debouncedTerm.toLowerCase();
       result = result.filter(teacher => 
         teacher.name.toLowerCase().includes(term) || 
         teacher.subject.toLowerCase().includes(term) ||
@@ -150,7 +152,7 @@ export default function TeacherList() {
     }
     
     setFilteredTeachers(result);
-  }, [teachers, selectedGrades, searchTerm]);
+  }, [teachers, selectedGrades, debouncedTerm]);
   
   // 处理联系老师
   const handleContactTeacher = (teacherId: string) => {

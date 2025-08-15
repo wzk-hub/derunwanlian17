@@ -159,7 +159,7 @@ const adminUser: User = {
             
             {error && (
               <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-center">
-                <i class="fa-solid fa-exclamation-circle mr-2"></i>
+                <i className="fa-solid fa-exclamation-circle mr-2"></i>
                 {error}
               </div>
             )}
@@ -172,7 +172,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-phone"></i>
+                    <i className="fa-solid fa-phone"></i>
                   </span>
                   <input
                     type="tel"
@@ -193,7 +193,7 @@ const adminUser: User = {
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    <i class="fa-solid fa-lock"></i>
+                    <i className="fa-solid fa-lock"></i>
                   </span>
                   <input
                     type="password"
@@ -216,7 +216,7 @@ const adminUser: User = {
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                      <i class="fa-solid fa-lock"></i>
+                      <i className="fa-solid fa-lock"></i>
                     </span>
                     <input
                       type="password"

@@ -134,7 +134,7 @@ const TeacherMessages = () => {
           onClick={() => navigate('/teacher')}
           className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4"
         >
-          <i class="fa-solid fa-arrow-left mr-2"></i>
+          <i className="fa-solid fa-arrow-left mr-2"></i>
           <span>返回老师中心</span>
         </button>
         

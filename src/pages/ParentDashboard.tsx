@@ -61,7 +61,7 @@ const ParentDashboard = () => {
                   : "text-gray-600 hover:bg-gray-100"
               )}
             >
-              <i class="fa-solid fa-user-graduate mr-2"></i>
+              <i className="fa-solid fa-user-graduate mr-2"></i>
                老师列表
             </button>
             <button
@@ -76,7 +76,7 @@ const ParentDashboard = () => {
                   : "text-gray-600 hover:bg-gray-100"
               )}
             >
-              <i class="fa-solid fa-tasks mr-2"></i>
+              <i className="fa-solid fa-tasks mr-2"></i>
               我的任务
             </button>
             <button
@@ -91,7 +91,7 @@ const ParentDashboard = () => {
                   : "text-gray-600 hover:bg-gray-100"
               )}
             >
-              <i class="fa-solid fa-plus-circle mr-2"></i>
+              <i className="fa-solid fa-plus-circle mr-2"></i>
               发布任务
             </button>
              <button
@@ -106,7 +106,7 @@ const ParentDashboard = () => {
                   : "text-gray-600 hover:bg-gray-100"
               )}
             >
-              <i class="fa-solid fa-comments mr-2"></i>
+              <i className="fa-solid fa-comments mr-2"></i>
               消息中心
             </button>
             <button
@@ -121,7 +121,7 @@ const ParentDashboard = () => {
                   : "text-gray-600 hover:bg-gray-100"
               )}
             >
-              <i class="fa-solid fa-user mr-2"></i>
+              <i className="fa-solid fa-user mr-2"></i>
               个人中心
             </button>
           </div>

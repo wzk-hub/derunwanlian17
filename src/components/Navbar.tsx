@@ -105,7 +105,7 @@ const Navbar = () => {
           {/* 移动端菜单按钮 */}
           <div className="md:hidden">
             <button className="text-gray-700 focus:outline-none">
-              <i class="fa-solid fa-bars text-xl"></i>
+              <i className="fa-solid fa-bars text-xl"></i>
             </button>
           </div>
         </div>
