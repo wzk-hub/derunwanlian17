@@ -14,10 +14,13 @@ const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState<'alipay' | 'wechat'>('alipay');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   
+  // 读取管理员上传的二维码
+  const adminCodes = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
+  
   // 收款二维码图片地址（支持本地与远程）
   const paymentQRCodes = {
-    alipay: "/assets/payments/alipay_qr.jpg",
-    wechat: "/assets/payments/wechat_qr.jpg"
+    alipay: adminCodes.alipay || "/assets/payments/alipay_qr.jpg",
+    wechat: adminCodes.wechat || "/assets/payments/wechat_qr.jpg"
   } as const;
   // 远程备用（若本地资源不可用）
   const fallbackQRCodes = {

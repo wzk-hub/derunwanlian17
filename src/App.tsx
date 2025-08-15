@@ -8,6 +8,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import UserManagement from "@/pages/admin/UserManagement";
 import AdminTasks from "@/pages/admin/Tasks";
 import AdminSettlements from "@/pages/admin/Settlements";
+import AdminSettings from "@/pages/admin/Settings";
 import TeacherList from "@/pages/parent/TeacherList";
 import TaskPublish from "@/pages/parent/TaskPublish";
 import Payment from "@/pages/parent/Payment";
@@ -165,6 +166,7 @@ export default function App() {
                <Route path="tasks" element={<AdminTasks />} />
                <Route path="users" element={<UserManagement />} />
                <Route path="settlements" element={<AdminSettlements />} />
+               <Route path="settings" element={<AdminSettings />} />
                <Route index element={<Navigate to="/admin/tasks" replace />} />
              </Route>
             <Route path="*" element={<div className="text-center text-xl py-10">页面未找到</div>} />
