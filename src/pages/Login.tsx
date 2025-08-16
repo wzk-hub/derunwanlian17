@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
+import { apiPost } from '@/lib/apiClient';
 
 // 模拟用户数据存储
 interface User {
@@ -57,7 +58,7 @@ const Login = () => {
   }, []);
   
   // 处理表单提交
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
@@ -85,6 +86,30 @@ const Login = () => {
     }
     
     setLoading(true);
+
+    // 优先尝试调用后端函数实现登录
+    if (isLogin) {
+      try {
+        const result = await apiPost<{ user: any; token: string }>('login', { phone, password });
+        if (result?.user) {
+          const { user, token } = result;
+          setAuth(user.id, user.role, user.name);
+          localStorage.setItem('currentUser', JSON.stringify({ ...user, token }));
+          localStorage.setItem('authToken', token);
+          if (user.role === 'parent') {
+            navigate('/parent');
+          } else if (user.role === 'teacher') {
+            navigate('/teacher');
+          } else if (user.role === 'admin') {
+            navigate('/admin');
+          }
+          setLoading(false);
+          return;
+        }
+      } catch (err: any) {
+        // 如果函数返回401或失败，降级使用本地逻辑
+      }
+    }
     
     // 模拟API请求延迟
     setTimeout(() => {
@@ -92,9 +117,6 @@ const Login = () => {
       
       if (isLogin) {
         // 登录逻辑（管理员支持账号/手机号登录）
-        console.log('尝试登录，手机号:', phone, '密码:', password);
-        console.log('当前用户列表:', users);
-        
         // 简化用户查找逻辑
         let user = null;
         
@@ -111,15 +133,10 @@ const Login = () => {
           user = users.find((u: any) => u.phone === '15931319952' && u.role === 'admin' && u.password === password);
         }
         
-        console.log('找到的用户:', user);
-        
         if (user) {
-          console.log('登录成功，用户信息:', user);
           setAuth(user.id, user.role, user.name);
-          
           // 保存当前用户信息
           localStorage.setItem('currentUser', JSON.stringify(user));
-          
           // 根据角色重定向
           if (user.role === 'parent') {
             navigate('/parent');
@@ -129,7 +146,6 @@ const Login = () => {
             navigate('/admin');
           }
         } else {
-          console.log('登录失败，未找到匹配的用户');
           setError('手机号或密码不正确');
         }
       } else {
@@ -142,27 +158,27 @@ const Login = () => {
           return;
         }
         
-         // 创建新用户
-         const newUser: User = {
-           id: `${role}-${Date.now()}`,
-           phone,
-           password,
-           role,
-           createdAt: new Date(),
+        // 创建新用户
+        const newUser: User = {
+          id: `${role}-${Date.now()}`,
+          phone,
+          password,
+          role,
+          createdAt: new Date(),
           verificationStatus: 'unverified', // 初始状态为未认证
           ...(role === 'parent' && { childGrade })
-         };
-         
-         // 保存新用户
-         users.push(newUser);
-         localStorage.setItem('users', JSON.stringify(users));
-         
-          // 自动登录新用户
-          setAuth(newUser.id, role);
-         localStorage.setItem('currentUser', JSON.stringify(newUser));
-         
-         // 注册后跳转到实名认证页面
-         navigate(role === 'parent' ? '/parent/verification' : '/teacher/verification');
+        } as any;
+        
+        // 保存新用户
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // 自动登录新用户
+        setAuth(newUser.id, role);
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        
+        // 注册后跳转到实名认证页面
+        navigate(role === 'parent' ? '/parent/verification' : '/teacher/verification');
       }
       
       setLoading(false);

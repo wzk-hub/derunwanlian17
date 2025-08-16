@@ -7,10 +7,12 @@
     "dev": "vite --host --port 3000",
     "build": "rimraf dist && vite build",
     "preinstall": "npx only-allow pnpm",
-    "start": "serve -l 3000 dist/static",
+    "start": "serve -l 3000 dist",
+    "preview": "vite preview --port 5000",
     "lint": "eslint src/**/*.{ts,tsx}",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
-    "update:lockfile": "pnpm update"
+    "update:lockfile": "pnpm update",
+    "dev:netlify": "pnpm -s dlx netlify-cli dev --port 8888 --targetPort 3000 --framework=vite"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -33,11 +35,12 @@
     "typescript": "~5.7.2",
     "vite": "^6.2.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "rimraf": "^5.0.7"
+    "rimraf": "^5.0.7",
+    "serve": "^14.2.3"
   },
   "engines": {
-    "node": "22.18.0",
-    "npm": "10.9.3",
+    "node": ">=20",
+    "npm": ">=9",
     "pnpm": "9.6.0"
   },
   "packageManager": "pnpm@9.6.0",

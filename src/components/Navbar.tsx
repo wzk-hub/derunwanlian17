@@ -1,6 +1,8 @@
 import { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
+import ServiceStatus from '@/components/ServiceStatus';
+import ServerSwitch from '@/components/ServerSwitch';
 
 const Navbar = () => {
   const { isAuthenticated, userRole, logout } = useContext(AuthContext);
@@ -43,6 +45,11 @@ const Navbar = () => {
           {/* 桌面导航 */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">首页</Link>
+            
+            <div className="flex items-center gap-2">
+              <ServiceStatus />
+              <ServerSwitch />
+            </div>
             
             {isAuthenticated ? (
               <>
