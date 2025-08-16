@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { api } from '@/utils/api';
 
 // 老师个人资料编辑页面
 const TeacherProfile = () => {
@@ -99,7 +100,8 @@ const TeacherProfile = () => {
         grade: profileData.grade || [],
         price: profileData.price || 100,
         avatar: profileData.avatar || '',
-        certificates: profileData.certificates || []
+        certificates: profileData.certificates || [],
+        paymentQrCode: profileData.paymentQrCode || ''
       });
       
       // 设置头像预览
@@ -112,6 +114,11 @@ const TeacherProfile = () => {
       
       // 设置证书预览
       setCertificatePreviews(profileData.certificates || []);
+      
+      // 设置收款码预览
+      if (profileData.paymentQrCode) {
+        setQrCodePreview(profileData.paymentQrCode);
+      }
       
       setLoading(false);
     };
@@ -309,46 +316,68 @@ const TeacherProfile = () => {
   };
   
   // 保存老师资料
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!validateForm()) {
       return;
     }
     
     setSaving(true);
     
-    setTimeout(() => {
-      try {
-        // 获取现有老师资料
-        const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
-        
-        // 更新当前老师资料
-        teacherProfiles[userId!] = formData;
-        
-        // 保存到localStorage
-        localStorage.setItem('teacherProfiles', JSON.stringify(teacherProfiles));
-        
-        // 更新用户姓名
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const userIndex = users.findIndex((u: any) => u.id === userId);
-        
-        if (userIndex !== -1) {
-          users[userIndex].name = formData.name;
-          localStorage.setItem('users', JSON.stringify(users));
-          
-          // 更新当前用户信息
-          const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-          currentUser.name = formData.name;
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
-        
-        toast.success('个人资料保存成功！');
-      } catch (error) {
-        console.error('保存个人资料失败:', error);
-        toast.error('保存个人资料失败，请重试');
-      } finally {
-        setSaving(false);
+    try {
+      // 同步到后端（如果可用）
+      const isDataUrl = formData.paymentQrCode && formData.paymentQrCode.startsWith('data:');
+      if (isDataUrl) {
+        const fd = new FormData();
+        fd.append('name', formData.name);
+        fd.append('introduction', formData.introduction);
+        fd.append('experience', formData.experience);
+        fd.append('subject', formData.subject);
+        fd.append('grade', formData.grade.join(','));
+        fd.append('price', String(formData.price));
+        fd.append('avatar', formData.avatar);
+        fd.append('certificates', JSON.stringify(formData.certificates));
+        const blob = await (await fetch(formData.paymentQrCode)).blob();
+        fd.append('paymentQrCode', blob, 'teacher_qr.png');
+        try {
+          await api.updateTeacherProfile(userId!, fd);
+        } catch (_e) { /* 忽略后端失败，走本地兜底 */ }
+      } else {
+        try {
+          await api.updateTeacherProfile(userId!, {
+            ...formData,
+            grade: formData.grade,
+          });
+        } catch (_e) {}
       }
-    }, 800);
+
+      // 本地存储兜底
+      const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
+      teacherProfiles[userId!] = formData;
+      localStorage.setItem('teacherProfiles', JSON.stringify(teacherProfiles));
+      
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const userIndex = users.findIndex((u: any) => u.id === userId);
+      
+      if (userIndex !== -1) {
+        users[userIndex].name = formData.name;
+        users[userIndex].paymentQrCode = formData.paymentQrCode;
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        currentUser.name = formData.name;
+        if (currentUser && currentUser.id === userId) {
+          currentUser.paymentQrCode = formData.paymentQrCode;
+        }
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+      
+      toast.success('个人资料保存成功！');
+    } catch (error) {
+      console.error('保存个人资料失败:', error);
+      toast.error('保存个人资料失败，请重试');
+    } finally {
+      setSaving(false);
+    }
   };
   
   if (loading) {

@@ -270,6 +270,10 @@ export default function UserManagement() {
                             verificationStatusText: user.verificationStatus
                           };
                           
+                          // 兼容从 teacherProfiles 读取老师收款码
+                          const teacherProfiles = JSON.parse(localStorage.getItem('teacherProfiles') || '{}');
+                          const paymentQrCode = teacherProfiles[user.id]?.paymentQrCode || (user as any).paymentQrCode;
+                          
                           // 创建一个临时弹窗显示用户详情
                           const detailsHTML = `
                             <div class="max-w-md">
@@ -295,7 +299,7 @@ export default function UserManagement() {
                                 </div>
                                 <div class="flex justify-between">
                                   <span class="text-gray-500">认证状态:</span>
-                                  <span>${getVerificationStatus(user.verificationStatus)}</span>
+                                  <span>${user.verificationStatus}</span>
                                 </div>
                                 
                                 ${user.role === 'teacher' ? `
@@ -317,9 +321,9 @@ export default function UserManagement() {
                                   
                                   <div class="border-t pt-4 mt-4">
                                     <h4 class="font-medium mb-2">收款信息</h4>
-                                    ${user.paymentQrCode ? `
+                                    ${paymentQrCode ? `
                                       <div class="flex justify-center my-2">
-                                        <img src="${user.paymentQrCode}" alt="收款码" class="h-32 w-32 object-contain" />
+                                        <img src="${paymentQrCode}" alt="收款码" class="h-32 w-32 object-contain" />
                                       </div>
                                       <div class="text-center text-sm text-gray-500">支付宝收款码</div>
                                     ` : '<div class="text-gray-500 text-center py-2">未设置收款方式</div>'}
