@@ -1,14 +1,27 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { debugAdminAccount, forceCreateAdminAccount, testLogin } from '@/utils/debugAdminAccount';
 import { quickFixAdminLogin, resetToDefaultState } from '@/utils/fixAdminLogin';
+import { apiGet } from '@/lib/apiClient';
 
 export default function Home() {
   const { isAuthenticated, userRole } = useContext(AuthContext);
   
   // 生成德润万联标识图片URL
   const logoUrl = "https://space.coze.cn/api/coze_space/gen_image?image_size=square&prompt=DeRunWanLian+Education+Logo+Chinese+characters+professional+education+institution+blue+color+simple+modern&sign=f2a2726d10afa9a26106ece90fbd02d9";
+
+  const [siteInfo, setSiteInfo] = useState<{
+    name: string;
+    tagline: string;
+    stats?: { teachers: number; subjects: number; studentsHelped: number }
+  } | null>(null);
+
+  useEffect(() => {
+    apiGet('site-info')
+      .then((data) => setSiteInfo(data as any))
+      .catch(() => {});
+  }, []);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -24,8 +37,13 @@ export default function Home() {
                 alt="德润万联教育" 
                 className="w-32 h-32 md:w-40 md:h-40 object-contain mb-4 rounded-lg shadow-lg"
               />
-              <h1 className="text-4xl md:text-5xl font-bold text-blue-800">德润万联教育</h1>
-              <p className="text-xl text-blue-600 mt-2">连接优质教育资源，助力孩子成长</p>
+              <h1 className="text-4xl md:text-5xl font-bold text-blue-800">{siteInfo?.name || '德润万联教育'}</h1>
+              <p className="text-xl text-blue-600 mt-2">{siteInfo?.tagline || '连接优质教育资源，助力孩子成长'}</p>
+              {siteInfo?.stats && (
+                <p className="text-sm text-blue-700 mt-1">
+                  已服务 {siteInfo.stats.studentsHelped.toLocaleString()} 名学生 · {siteInfo.stats.teachers} 位老师 · {siteInfo.stats.subjects} 门科目
+                </p>
+              )}
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 max-w-3xl">

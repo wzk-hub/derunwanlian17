@@ -1,9 +1,15 @@
 [build]
   command = "pnpm build"
   publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_VERSION = "22.18.0"
+  SITE_NAME = "德润万联教育"
+  SITE_TAGLINE = "连接优质教育资源，助力孩子成长"
 
 [[redirects]]
   from = "/*"
