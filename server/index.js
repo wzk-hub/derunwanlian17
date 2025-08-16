@@ -4,6 +4,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import OSS from 'ali-oss';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,17 +27,20 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
+// OSS client (optional)
+const ossEnabled = !!(process.env.ALI_REGION && process.env.ALI_OSS_BUCKET && process.env.ALI_ACCESS_KEY_ID && process.env.ALI_ACCESS_KEY_SECRET);
+let ossClient = null;
+if (ossEnabled) {
+	ossClient = new OSS({
+		region: process.env.ALI_REGION,
+		bucket: process.env.ALI_OSS_BUCKET,
+		accessKeyId: process.env.ALI_ACCESS_KEY_ID,
+		accessKeySecret: process.env.ALI_ACCESS_KEY_SECRET
+	});
+}
+
 // Multer setup
-const storage = multer.diskStorage({
-	destination: function (_req, _file, cb) {
-		cb(null, uploadsDir);
-	},
-	filename: function (_req, file, cb) {
-		const ext = path.extname(file.originalname) || '.png';
-		const base = file.fieldname + '_' + Date.now();
-		cb(null, `${base}${ext}`);
-	}
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Helpers
@@ -52,9 +56,25 @@ function writeDb(db) {
 	fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
 }
 
+async function saveFile(buffer, originalName, prefix = 'uploads') {
+	const ext = path.extname(originalName) || '.png';
+	const key = `${prefix}/${Date.now()}_${Math.random().toString(36).slice(2)}${ext}`;
+	if (ossEnabled && ossClient) {
+		await ossClient.put(key, buffer);
+		const bucket = process.env.ALI_OSS_BUCKET;
+		const region = process.env.ALI_REGION;
+		return `https://${bucket}.oss-${region}.aliyuncs.com/${key}`;
+	} else {
+		const localPath = path.join(uploadsDir, key.replace(`${prefix}/`, ''));
+		await fs.promises.mkdir(path.dirname(localPath), { recursive: true });
+		await fs.promises.writeFile(localPath, buffer);
+		return `/uploads/${path.basename(localPath)}`;
+	}
+}
+
 // Health
 app.get('/api/health', (_req, res) => {
-	res.json({ ok: true, time: new Date().toISOString() });
+	res.json({ ok: true, time: new Date().toISOString(), ossEnabled });
 });
 
 // Admin payment QR codes
@@ -64,18 +84,23 @@ app.get('/api/admin/payment-qrcodes', (_req, res) => {
 	res.json({ alipay: q.alipay || null, wechat: q.wechat || null });
 });
 
-app.post('/api/admin/payment-qrcodes', upload.fields([{ name: 'alipay', maxCount: 1 }, { name: 'wechat', maxCount: 1 }]), (req, res) => {
+app.post('/api/admin/payment-qrcodes', upload.fields([{ name: 'alipay', maxCount: 1 }, { name: 'wechat', maxCount: 1 }]), async (req, res) => {
 	const db = readDb();
 	const next = db.paymentQRCodes || {};
-	if (req.files && req.files['alipay'] && req.files['alipay'][0]) {
-		next.alipay = `/uploads/${req.files['alipay'][0].filename}`;
+	try {
+		if (req.files && req.files['alipay'] && req.files['alipay'][0]) {
+			next.alipay = await saveFile(req.files['alipay'][0].buffer, req.files['alipay'][0].originalname, 'admin');
+		}
+		if (req.files && req.files['wechat'] && req.files['wechat'][0]) {
+			next.wechat = await saveFile(req.files['wechat'][0].buffer, req.files['wechat'][0].originalname, 'admin');
+		}
+		db.paymentQRCodes = next;
+		writeDb(db);
+		res.json({ success: true, paymentQRCodes: next });
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ success: false, message: 'upload failed' });
 	}
-	if (req.files && req.files['wechat'] && req.files['wechat'][0]) {
-		next.wechat = `/uploads/${req.files['wechat'][0].filename}`;
-	}
-	db.paymentQRCodes = next;
-	writeDb(db);
-	res.json({ success: true, paymentQRCodes: next });
 });
 
 // Teachers
@@ -89,7 +114,7 @@ app.get('/api/teachers/:id', (req, res) => {
 	return res.json({ profile });
 });
 
-app.put('/api/teachers/:id', upload.single('paymentQrCode'), (req, res) => {
+app.put('/api/teachers/:id', upload.single('paymentQrCode'), async (req, res) => {
 	const { id } = req.params;
 	const db = readDb();
 	const existing = (db.teacherProfiles && db.teacherProfiles[id]) || {};
@@ -108,23 +133,28 @@ app.put('/api/teachers/:id', upload.single('paymentQrCode'), (req, res) => {
 		paymentQrCode: existing.paymentQrCode || ''
 	};
 
-	if (req.file) {
-		profile.paymentQrCode = `/uploads/${req.file.filename}`;
-	}
+	try {
+		if (req.file) {
+			profile.paymentQrCode = await saveFile(req.file.buffer, req.file.originalname, 'teacher');
+		}
 
-	if (body.certificates && typeof body.certificates === 'string') {
-		try {
-			profile.certificates = JSON.parse(body.certificates);
-		} catch (_e) {}
-	}
+		if (body.certificates && typeof body.certificates === 'string') {
+			try {
+				profile.certificates = JSON.parse(body.certificates);
+			} catch (_e) {}
+		}
 
-	db.teacherProfiles = db.teacherProfiles || {};
-	db.teacherProfiles[id] = profile;
-	writeDb(db);
-	res.json({ success: true, profile });
+		db.teacherProfiles = db.teacherProfiles || {};
+		db.teacherProfiles[id] = profile;
+		writeDb(db);
+		res.json({ success: true, profile });
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ success: false, message: 'update failed' });
+	}
 });
 
 // Start server
 app.listen(PORT, () => {
-	console.log(`API server listening on http://localhost:${PORT}`);
+	console.log(`API server listening on http://localhost:${PORT} (OSS: ${ossEnabled ? 'enabled' : 'disabled'})`);
 });
