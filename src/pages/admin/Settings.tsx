@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { cleanupDuplicateAccounts, validateAdminAccount, forceResetAdminAccount } from '@/utils/adminAccountCleanup';
 import { debugAdminAccount, forceCreateAdminAccount, clearAllData, testLogin } from '@/utils/debugAdminAccount';
 import { toast } from 'sonner';
+import { api } from '@/utils/api';
 
 interface PaymentQRCodes {
 	alipay?: string;
@@ -13,8 +14,15 @@ export default function AdminSettings() {
 	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
-		const stored = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
-		setCodes(stored);
+		(async () => {
+			try {
+				const res = await api.getAdminQRCodes();
+				setCodes({ alipay: res.alipay || undefined, wechat: res.wechat || undefined });
+			} catch (_e) {
+				const stored = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
+				setCodes(stored);
+			}
+		})();
 	}, []);
 
 	const handleFile = (key: 'alipay' | 'wechat') => async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,13 +33,31 @@ export default function AdminSettings() {
 		reader.readAsDataURL(file);
 	};
 
-	const save = () => {
+	const save = async () => {
 		setSaving(true);
-		setTimeout(() => {
+		try {
+			const form = new FormData();
+			// 当 codes.* 为 dataURL 时，通过 fetch+blob 传给后端；若是以 /uploads/ 开头则不重复提交
+			if (codes.alipay && !codes.alipay.startsWith('/uploads/')) {
+				const blob = await (await fetch(codes.alipay)).blob();
+				form.append('alipay', blob, 'alipay.png');
+			}
+			if (codes.wechat && !codes.wechat.startsWith('/uploads/')) {
+				const blob = await (await fetch(codes.wechat)).blob();
+				form.append('wechat', blob, 'wechat.png');
+			}
+			if ([...form.keys()].length > 0) {
+				const server = await api.uploadAdminQRCodes(form);
+				setCodes({ alipay: server.alipay || undefined, wechat: server.wechat || undefined });
+			}
+			// 本地兜底保存
 			localStorage.setItem('paymentQRCodes', JSON.stringify(codes));
+			toast.success('收款二维码已保存');
+		} catch (e) {
+			toast.error('保存失败，请重试');
+		} finally {
 			setSaving(false);
-			alert('收款二维码已保存');
-		}, 300);
+		}
 	};
 
 	const clearOne = (key: 'alipay' | 'wechat') => {

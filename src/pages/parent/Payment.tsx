@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/authContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { api } from '@/utils/api';
 
 // 支付页面组件
 const Payment = () => {
@@ -14,13 +15,25 @@ const Payment = () => {
   const [paymentMethod, setPaymentMethod] = useState<'alipay' | 'wechat'>('alipay');
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   
-  // 读取管理员上传的二维码
-  const adminCodes = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
+  // 读取管理员上传的二维码（支持后端）
+  const [serverCodes, setServerCodes] = useState<{ alipay?: string; wechat?: string }>({});
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.getAdminQRCodes();
+        setServerCodes({ alipay: res.alipay || undefined, wechat: res.wechat || undefined });
+      } catch (_e) {
+        const stored = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
+        setServerCodes(stored);
+      }
+    })();
+  }, []);
   
   // 收款二维码图片地址（支持本地与远程）
+  const adminCodes = JSON.parse(localStorage.getItem('paymentQRCodes') || '{}');
   const paymentQRCodes = {
-    alipay: adminCodes.alipay || "/assets/payments/alipay_qr.jpg",
-    wechat: adminCodes.wechat || "/assets/payments/wechat_qr.jpg"
+    alipay: serverCodes.alipay || adminCodes.alipay || "/assets/payments/alipay_qr.jpg",
+    wechat: serverCodes.wechat || adminCodes.wechat || "/assets/payments/wechat_qr.jpg"
   } as const;
   // 远程备用（若本地资源不可用）
   const fallbackQRCodes = {
@@ -77,7 +90,7 @@ const Payment = () => {
     const imgWechat = new Image();
     imgWechat.onerror = () => setQrSrcs(prev => ({ ...prev, wechat: fallbackQRCodes.wechat }));
     imgWechat.src = paymentQRCodes.wechat;
-  }, []);
+  }, [paymentQRCodes.alipay, paymentQRCodes.wechat]);
   
   // 处理支付完成确认
   const handlePaymentConfirm = () => {

@@ -10,7 +10,8 @@
     "start": "serve -l 3000 dist/static",
     "lint": "eslint src/**/*.{ts,tsx}",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
-    "update:lockfile": "pnpm update"
+    "update:lockfile": "pnpm update",
+    "backend:dev": "node server/index.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
