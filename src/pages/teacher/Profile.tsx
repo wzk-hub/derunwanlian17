@@ -99,7 +99,8 @@ const TeacherProfile = () => {
         grade: profileData.grade || [],
         price: profileData.price || 100,
         avatar: profileData.avatar || '',
-        certificates: profileData.certificates || []
+        certificates: profileData.certificates || [],
+        paymentQrCode: profileData.paymentQrCode || ''
       });
       
       // 设置头像预览
@@ -112,6 +113,11 @@ const TeacherProfile = () => {
       
       // 设置证书预览
       setCertificatePreviews(profileData.certificates || []);
+      
+      // 设置收款码预览
+      if (profileData.paymentQrCode) {
+        setQrCodePreview(profileData.paymentQrCode);
+      }
       
       setLoading(false);
     };
@@ -333,11 +339,15 @@ const TeacherProfile = () => {
         
         if (userIndex !== -1) {
           users[userIndex].name = formData.name;
+          users[userIndex].paymentQrCode = formData.paymentQrCode;
           localStorage.setItem('users', JSON.stringify(users));
           
           // 更新当前用户信息
           const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
           currentUser.name = formData.name;
+          if (currentUser && currentUser.id === userId) {
+            currentUser.paymentQrCode = formData.paymentQrCode;
+          }
           localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
         

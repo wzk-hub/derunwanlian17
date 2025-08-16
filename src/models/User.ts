@@ -64,4 +64,3 @@ export interface TeacherRating {
   updatedAt?: Date;
   updatedById?: string; // 管理员修改评分时的ID
 }
-}
